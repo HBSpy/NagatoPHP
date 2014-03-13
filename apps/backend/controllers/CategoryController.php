@@ -2,7 +2,7 @@
 
 namespace NagatoPHP\Backend\Controllers;
 
-class IndexController extends ControllerBase {
+class CategoryController extends ControllerBase {
 
     public function indexAction() {
 
