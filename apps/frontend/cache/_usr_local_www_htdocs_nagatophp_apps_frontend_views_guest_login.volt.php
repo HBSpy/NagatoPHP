@@ -43,11 +43,22 @@
 <script>
 	$('#loginform').submit(function (){
 		$.post(null, $(this).serialize(), function (data){
-			console.log(data);
 			if(data.error == 'USER'){
 				$('#div_username').addClass('has-warning has-feedback')
-				$('#label_username').html('用户名不存在').next().focus().next().removeClass('hide');
+				$('#label_username').html('用户名不存在').removeClass('hide').next().focus().next().removeClass('hide');
+
+				$('#div_passowrd').removeClass('has-error has-feedback');
+				$('#label_password').addClass('hide').empty().next().next().addClass('hide');
+			} else if(data.error == 'PWD'){
+				$('#div_passowrd').addClass('has-error has-feedback')
+				$('#label_password').html('密码错误').removeClass('hide').next().focus().next().removeClass('hide');
+
+				$('#div_username').removeClass('has-warning has-feedback');
+				$('#label_username').addClass('hide').empty().next().next().addClass('hide');
+			} else {
+				window.location.href = data.redirect;
 			}
+
 		});
 		
 		return false;

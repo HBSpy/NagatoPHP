@@ -4,7 +4,8 @@ use Phalcon\Mvc\Application;
 
 error_reporting(E_ALL);
 
-try {
+(new Phalcon\Debug())->listen();
+//try {
 
     /**
      * Include services
@@ -28,8 +29,10 @@ try {
 
     echo $application->handle()->getContent();
 
+	/*
 } catch (Phalcon\Exception $e) {
     echo $e->getMessage();
 } catch (PDOException $e) {
     echo $e->getMessage();
 }
+	 */

@@ -12,4 +12,30 @@ $router->add('/login', array(
 	'action' => 'login',
 ));
 
+$router->add('/admin', array(
+	'namespace' => 'NagatoPHP\Backend\Controllers',
+	'module' => 'backend',
+	'controller' => 'index',
+));
+
+$router->add('/admin/category', array(
+	'namespace' => 'NagatoPHP\Backend\Controllers',
+	'module' => 'backend',
+	'controller' => 'category',
+));
+
+$router->add('/admin/category/add', array(
+	'namespace' => 'NagatoPHP\Backend\Controllers',
+	'module' => 'backend',
+	'controller' => 'category',
+	'action' => 'add',
+));
+
+$router->add('/admin/category/addtag/:int', array(
+	'namespace' => 'NagatoPHP\Backend\Controllers',
+	'module' => 'backend',
+	'controller' => 'category',
+	'action' => 'addtag',
+	'cid' => 1,
+));
 return $router;
