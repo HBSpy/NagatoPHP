@@ -16,10 +16,16 @@ class CategoryController extends ControllerBase {
 	public function initialize(){
 		parent::initialize();
 		$categorys = Category::find();
-		$this->view->categorys = $categorys;
+		foreach($categorys as $category){
+			$file = __DIR__ . '/../../config/category/' . $category->name . '.json';
+			$category->tags = is_readable($file) ? (object)json_decode(file_get_contents($file)) : (object)array();
+			$this->categorys += array($category->cid => $category);
+		}
 	}
 
+
     public function indexAction() {
+		$this->view->categorys = $this->categorys;
     }
 	
 	/**
@@ -38,9 +44,11 @@ class CategoryController extends ControllerBase {
 				foreach($category->getMessages() as $message){
 					$ret[]= array('field' => $message->getField(), 'error' => $message->getMessage());
 				}
+				$this->cache->delete('category');
 				$this->ajax->ajaxReturn($ret);
 			}
 		}
+
 	}
 
 	/**
@@ -53,9 +61,39 @@ class CategoryController extends ControllerBase {
 	 */
 	public function addtagAction($cid){
 		if($this->request->isAjax()){
-			$category = Category::findFirst($cid);
+			$category = $this->categorys[$cid];
+			$tags = (array)$category->tags;
 
-			$this->ajax->ajaxReturn($category);
+			$newtag = $this->request->getPost();
+		   	$newtag = array($newtag['tag'] => array('title' => $newtag['title'], 'item' => $newtag['item'], 'search' => isset($newtag['search']) ? TRUE : FALSE));
+			$tags = array_merge($tags, $newtag);
+			$file = __DIR__ . '/../../config/category/' . $category->name . '.json';
+			if(file_put_contents($file, json_encode($tags))){
+				$this->cache->delete('category');
+				$this->ajax->ajaxReturn(TRUE);
+			}
+		}
+	}
+
+	/**
+	 * 删除分区TAG
+	 *
+	 * @Router('admin/category/removetag/:int')
+	 * @Param 	cid 	分区ID
+	 * @Post 	tag 	TAG_ID
+	 */
+	public function removetagAction($cid){
+		if($this->request->isAjax()){
+			$category = $this->categorys[$cid];
+			$tags = (array)$category->tags;
+
+			$removetag = $this->request->getPost('removetag');
+			unset($tags[$removetag]);
+			$file = __DIR__ . '/../../config/category/' . $category->name . '.json';
+			if(file_put_contents($file, json_encode($tags))){
+				$this->cache->delete('category');
+				$this->ajax->ajaxReturn(TRUE);
+			}
 		}
 	}
 

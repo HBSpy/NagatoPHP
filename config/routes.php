@@ -38,4 +38,12 @@ $router->add('/admin/category/addtag/:int', array(
 	'action' => 'addtag',
 	'cid' => 1,
 ));
+
+$router->add('/admin/category/removetag/:int', array(
+	'namespace' => 'NagatoPHP\Backend\Controllers',
+	'module' => 'backend',
+	'controller' => 'category',
+	'action' => 'removetag',
+	'cid' => 1,
+));
 return $router;

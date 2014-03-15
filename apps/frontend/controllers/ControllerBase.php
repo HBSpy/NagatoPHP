@@ -2,6 +2,7 @@
 
 namespace NagatoPHP\Frontend\Controllers;
 use Phalcon\Mvc\Controller;
+use NagatoPHP\Models\Category as Category;
 
 /**
  *
@@ -13,12 +14,13 @@ class ControllerBase extends Controller {
 	public function initialize(){
 		$this->checkLogin();		
 		$this->loadTemplate();
+		$this->cacheCategory();
 	}
 
 	/**
 	 * 登录验证
 	 */
-	public function checkLogin(){
+	protected function checkLogin(){
 		if(!$this->session->get('uid')){
 			$this->response->redirect('login');
 		}
@@ -28,9 +30,31 @@ class ControllerBase extends Controller {
 	/**
 	 * 加载模板
 	 */
-	public function loadTemplate($template = 'common'){
+	protected function loadTemplate($template = 'common'){
 		$this->view->setTemplateAfter($template);
 		return;
 	}
 
+	/**
+	 * 缓存分区信息
+	 */
+	protected function cacheCategory(){
+		$cacheCategory = $this->cache->get('category');
+		if($cacheCategory == NULL){
+			$categorys = Category::find();
+			foreach($categorys as $category){
+				$file = __DIR__ . '/../../config/category/' . $category->name . '.json';
+				if(is_readable($file)){
+					$tags = array();
+					foreach(json_decode(file_get_contents($file), TRUE) as $key => $tag){
+						$tag['item'] = array_map('trim', explode(',', $tag['item']));
+						$tags[$key] = $tag;
+					}
+					$cacheCategory[$category->cid] = array('name' => $category->name, 'title' => $category->title, 'tags' => $tags);
+				}
+			}
+			$this->cache->save('category', $cacheCategory);
+		}
+		return;
+	}
 }
