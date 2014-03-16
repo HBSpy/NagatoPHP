@@ -52,6 +52,25 @@ class CategoryController extends ControllerBase {
 	}
 
 	/**
+	 * 删除分区
+	 *
+	 * @Router('admin/category/remove/:int')
+	 * @Param 	cid 	分区ID
+	 */
+	public function removeAction($cid){
+		if($this->request->isAjax()){
+			$category = Category::findFirst($cid);
+			@unlink(__DIR__ . '/../../config/category/' . $category->name . '.json');
+			if($category->delete()){
+				$this->cache->delete('category');
+				$this->ajax->ajaxReturn(array('success' => TRUE));
+			} else {
+				$this->ajax->ajaxReturn(array('error' => '竟然失败了'));
+			}
+		}
+	}
+
+	/**
 	 * 添加分区TAG
 	 *
 	 * @Router('admin/category/addtag/:int')
@@ -70,7 +89,9 @@ class CategoryController extends ControllerBase {
 			$file = __DIR__ . '/../../config/category/' . $category->name . '.json';
 			if(file_put_contents($file, json_encode($tags))){
 				$this->cache->delete('category');
-				$this->ajax->ajaxReturn(TRUE);
+				$this->ajax->ajaxReturn(array('success' => TRUE));
+			} else {
+				$this->ajax->ajaxReturn(array('error' => "文件 {$file} 不可写入"));
 			}
 		}
 	}
@@ -92,10 +113,11 @@ class CategoryController extends ControllerBase {
 			$file = __DIR__ . '/../../config/category/' . $category->name . '.json';
 			if(file_put_contents($file, json_encode($tags))){
 				$this->cache->delete('category');
-				$this->ajax->ajaxReturn(TRUE);
+				$this->ajax->ajaxReturn(array('success' => TRUE));
+			} else {
+				$this->ajax->ajaxReturn(array('error' => "文件 {$file} 不可写入"));
 			}
 		}
 	}
-
 }
 

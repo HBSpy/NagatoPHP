@@ -22,6 +22,7 @@
 				<div class="panel panel-primary">
 					<div class="panel-heading"><strong>{{ category.title }}</strong>
 						<span class="glyphicon glyphicon-plus pull-right add-tag" style="cursor:pointer;" cid="{{ category.cid }}"></span>
+						<span class="glyphicon glyphicon-minus pull-right remove" style="cursor:pointer; margin-right:10px;" cid="{{ category.cid }}"></span>
 					</div>
 					<form class="form-inline well" id="form-tag-{{ category.cid }}" style="display:none;">
 						<div class="form-group">
@@ -77,10 +78,10 @@
 	$('#add').click(function (){
 		$('#form-category').toggle('fast').submit(function (){
 			$.post('{{ url('admin/category/add') }}', $(this).serialize(), function (data){
-				if(!data.success){
-					$('#label_name').html(data[0].error).removeClass('sr-only').addClass('control-label').next().focus().next().removeClass('hide').parent().addClass('has-warning has-feedback');
-				} else {
+				if(data.success){
 					window.location.reload();
+				} else {
+					$('#label_name').html(data[0].error).removeClass('sr-only').addClass('control-label').next().focus().next().removeClass('hide').parent().addClass('has-warning has-feedback');
 				}
 			});
 			return false;
@@ -91,9 +92,12 @@
 		var cid = $(this).attr('cid');
 		$('#form-tag-' + cid).toggle('fast').submit(function (){
 			$.post('{{ url('admin/category/addtag')}}/' + cid, $(this).serialize(), function (data){
-				if(data){
+				if(data.success){
 					window.location.reload();
+				} else {
+					alert(data.error);
 				}
+
 			});
 			return false;
 		});
@@ -103,8 +107,21 @@
 		var cid = $(this).attr('cid');
 		var tag = $(this).attr('tag');
 		$.post('{{ url('admin/category/removetag')}}/' + cid, {removetag: tag}, function (data){
-			if(data){
+			if(data.success){
 				window.location.reload();
+			} else {
+				alert(data.error);
+			}
+		});
+	});
+
+	$('.remove').click(function (){
+		var cid = $(this).attr('cid');
+		$.post('{{ url('admin/category/remove')}}/' + cid, null, function (data){
+			if(data.success){
+				window.location.reload();
+			} else {
+				alert(data.error);
 			}
 		});
 	});
