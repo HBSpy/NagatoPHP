@@ -13,8 +13,8 @@ use NagatoPHP\Models\Category as Category;
 class ControllerBase extends Controller {
 	public function initialize(){
 		$this->checkLogin();		
-		$this->loadTemplate();
 		$this->cacheCategory();
+		$this->loadTemplate();
 	}
 
 	/**
@@ -32,6 +32,7 @@ class ControllerBase extends Controller {
 	 */
 	protected function loadTemplate($template = 'common'){
 		$this->view->setTemplateAfter($template);
+		$this->view->categorys = $this->cache->get('category');
 		return;
 	}
 

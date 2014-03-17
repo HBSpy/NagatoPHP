@@ -1,1 +1,1 @@
-Frontend\Index\index
+Index/index
