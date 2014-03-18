@@ -67,7 +67,7 @@ $di['flash'] = function () {
  */
 $di['cache'] = function () {
 	$datafront = new DataFrontend(array(
-		'lifetime' => 0,
+//		'lifetime' => 0,
 	));
 	$cache = new XcacheBackend($datafront, array(
 		'prefix' => '_nagato',

@@ -15,63 +15,62 @@
 		<button type="submit" class="btn btn-default">提交</button>
 	</form>
 	{% for category in categorys %}
-		{% if loop.index is odd %}
-		<div class="row">
-		{% endif %}
-			<div class="col-md-6">
-				<div class="panel panel-primary">
-					<div class="panel-heading"><strong>{{ category.title }}</strong>
-						<span class="glyphicon glyphicon-plus pull-right add-tag" style="cursor:pointer;" cid="{{ category.cid }}"></span>
-						<span class="glyphicon glyphicon-minus pull-right remove" style="cursor:pointer; margin-right:10px;" cid="{{ category.cid }}"></span>
-					</div>
-					<form class="form-inline well" id="form-tag-{{ category.cid }}" style="display:none;">
-						<div class="form-group">
-							<label class="sr-only" for="tag">TAG</label>
-							<input type="text" name="tag" id="tag" class="form-control" placeholder="TAG" required="required" />
-						</div>
-						<div class="form-group">
-							<label class="sr-only" for="title">名称</label>
-							<input type="text" name="title" id="title" class="form-control" placeholder="名称" required="required" />
-						</div>
-						<div class="form-group">
-							<label class="sr-only" for="item">标签项</label>
-							<input type="text" name="item" id="item" class="form-control" placeholder="标签项，逗号分隔" />
-							<span class="glyphicon glyphicon-warning-sign form-control-feedback hide"></span>
-						</div>
-						<div class="checkbox">
-							<label>
-								<input type="checkbox" name="search"> 搜索项
-							</label>
-						</div>
-						<button type="submit" class="btn btn-default">提交</button>
-					</form>
-					<table class="table table-hover">
-						<thead>
-							<tr>
-								<th>TAG</th>
-								<th>名称</th>
-								<th>标签项</th>
-								<th>搜索项</th>
-								<th>操作</th>
-							</tr>
-						</thead>
-						<tbody>
-							{% for key, ctag in category.tags %}
-							<tr>
-								<td>{{ key }}
-								<td>{{ ctag.title }}</td>
-								<td>{{ ctag.item }}</td>
-								<td>{% if ctag.search %}是{% else %}否{% endif %}</td>
-								<td><span class="glyphicon glyphicon-remove remove-tag" style="cursor:pointer;" cid="{{ category.cid }}" tag="{{ key }}"></span></td>
-							</tr>
-							{% endfor %}
-						</tbody>
-					</table>
-				</div>
+		<div class="panel panel-primary">
+			<div class="panel-heading"><strong>{{ category.title }}</strong>
+				<span class="glyphicon glyphicon-plus pull-right add-tag" style="cursor:pointer;" cid="{{ category.cid }}"></span>
+				<span class="glyphicon glyphicon-minus pull-right remove" style="cursor:pointer; margin-right:10px;" cid="{{ category.cid }}"></span>
 			</div>
-		{% if loop.index is even %}
+			<form class="form-inline well" id="form-tag-{{ category.cid }}" style="display:none;">
+				<div class="form-group">
+					<label class="sr-only" for="tag">TAG</label>
+					<input type="text" name="tag" id="tag" class="form-control" placeholder="TAG1, TAG2 ..." required="required" />
+				</div>
+				<div class="form-group">
+					<label class="sr-only" for="title">名称</label>
+					<input type="text" name="title" id="title" class="form-control" placeholder="名称" required="required" />
+				</div>
+				<div class="form-group">
+					<label class="sr-only" for="item">标签项</label>
+					<input type="text" name="item" id="item" class="form-control" placeholder="标签项，逗号分隔" />
+				</div>
+				<div class="form-group">
+					<label class="sr-only" for="help">帮助信息</label>
+					<input type="text" name="help" id="help" class="form-control" placeholder="帮助信息" />
+				</div>
+				<div class="checkbox">
+					<label>
+						<input type="checkbox" name="search"> 搜索项
+					</label>
+				</div>
+				<button type="submit" class="btn btn-default">提交</button>
+			</form>
+			<table class="table table-hover">
+				<thead>
+					<tr>
+						<th>TAG</th>
+						<th>名称</th>
+						<th>标签项</th>
+						<th>帮助信息</th>
+						<th>搜索项</th>
+						<th>操作</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for key, ctag in category.tags %}
+					<tr>
+						<td>{{ key }}
+						<td>{{ ctag.title }}</td>
+						<td>{{ ctag.item }}</td>
+						<td>{{ ctag.help }}</td>
+						<td>{% if ctag.search %}是{% else %}否{% endif %}</td>
+						<td>
+							<span class="glyphicon glyphicon-remove remove-tag" style="cursor:pointer;" cid="{{ category.cid }}" tag="{{ key }}"></span>
+						</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
 		</div>
-		{% endif %}
 	{% endfor %}
 </div>
 <script>

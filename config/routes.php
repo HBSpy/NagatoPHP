@@ -42,10 +42,9 @@ $router->add('/admin/category', array(
 ));
 
 // Torrent
-$router->add('/upload/:int', array(
+$router->add('/upload/{category:[a-zA-Z]+}', array(
 	'controller' => 'torrent',
 	'action' => 'add',
-	'cid' => 1,
 ));
 
 return $router;

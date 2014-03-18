@@ -77,6 +77,7 @@ class CategoryController extends ControllerBase {
 	 * @Param 	cid 	分区ID
 	 * @Post 	tag 	TAG
 	 * @Post 	item 	标签项
+	 * @Post 	help 	帮助信息
 	 */
 	public function addtagAction($cid){
 		if($this->request->isAjax()){
@@ -84,7 +85,7 @@ class CategoryController extends ControllerBase {
 			$tags = (array)$category->tags;
 
 			$newtag = $this->request->getPost();
-		   	$newtag = array($newtag['tag'] => array('title' => $newtag['title'], 'item' => $newtag['item'], 'search' => isset($newtag['search']) ? TRUE : FALSE));
+		   	$newtag = array($newtag['tag'] => array('title' => $newtag['title'], 'item' => $newtag['item'], 'search' => isset($newtag['search']) ? TRUE : FALSE, 'help' => $newtag['help']));
 			$tags = array_merge($tags, $newtag);
 			$file = __DIR__ . '/../../config/category/' . $category->name . '.json';
 			if(file_put_contents($file, json_encode($tags))){

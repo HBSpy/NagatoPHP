@@ -29,6 +29,8 @@ class ControllerBase extends Controller {
 
 	/**
 	 * 加载模板
+	 *
+	 * @Param 	template 	模板名
 	 */
 	protected function loadTemplate($template = 'common'){
 		$this->view->setTemplateAfter($template);
@@ -48,10 +50,12 @@ class ControllerBase extends Controller {
 				if(is_readable($file)){
 					$tags = array();
 					foreach(json_decode(file_get_contents($file), TRUE) as $key => $tag){
-						$tag['item'] = array_map('trim', explode(',', $tag['item']));
+						$tag['items'] = empty($tag['item']) ? array() : array_map('trim', explode(',', $tag['item']));
+						unset($tag['item']);
 						$tags[$key] = $tag;
 					}
 					$cacheCategory[$category->cid] = array('name' => $category->name, 'title' => $category->title, 'tags' => $tags);
+					$cacheCategory[$category->name] = array('cid' => $category->cid, 'title' => $category->title, 'tags' => $tags);
 				}
 			}
 			$this->cache->save('category', $cacheCategory);

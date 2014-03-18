@@ -14,31 +14,8 @@
 	<!-- Collect the nav links, forms, and other content for toggling -->
 	<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 		<ul class="nav navbar-nav">
-			<li class="active"><a href="#">Link</a></li>
-			<li><a href="#">Link</a></li>
 			<li class="dropdown">
-			<a href="#" class="dropdown-toggle" data-toggle="dropdown">发布 <b class="caret"></b></a>
-			<ul class="dropdown-menu">
-				<?php foreach ($categorys as $key => $category) { ?>
-				<li><a href="<?php echo $this->url->get('upload/' . $key); ?>"><?php echo $category['title']; ?></a></li>
-				<?php } ?>
-			</ul>
-			</li>
-		</ul>
-		<form class="navbar-form navbar-left" role="search" style="display:inline-table;">
-			<div class="form-group">
-				<div class="input-group">
-					<input type="text" class="form-control" placeholder="热门：父爱如山" />
-					<span class="input-group-btn">
-						<button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
-					</span>
-				</div>
-			</div>
-		</form>
-		<ul class="nav navbar-nav navbar-right">
-			<li><a href="#">Link</a></li>
-			<li class="dropdown">
-			<a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
+			<a href="#" class="dropdown-toggle" data-toggle="dropdown">HBSpy <b class="caret"></b></a>
 			<ul class="dropdown-menu">
 				<li><a href="#">Action</a></li>
 				<li><a href="#">Another action</a></li>
@@ -48,6 +25,28 @@
 			</ul>
 			</li>
 		</ul>
+		<ul class="nav navbar-nav navbar-right">
+			<li class="dropdown">
+			<a href="#" class="dropdown-toggle" data-toggle="dropdown">发布 <b class="caret"></b></a>
+			<ul class="dropdown-menu">
+				<?php foreach ($categorys as $key => $category) { ?>
+				<?php if (gettype($key) === ('string')) { ?>
+				<li><a href="<?php echo $this->url->get('upload/' . $key); ?>"><?php echo $category['title']; ?></a></li>
+				<?php } ?>
+				<?php } ?>
+			</ul>
+			</li>
+		</ul>
+		<form class="navbar-form" role="search" style="display:inline-table;">
+			<div class="form-group">
+				<div class="input-group">
+					<input type="text" class="form-control" placeholder="热门：父爱如山" />
+					<span class="input-group-btn">
+						<button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
+					</span>
+				</div>
+			</div>
+		</form>
 	</div><!-- /.navbar-collapse -->
 </div><!-- /.container-fluid -->
 </nav>
