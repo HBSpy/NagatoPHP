@@ -3,6 +3,7 @@
 namespace NagatoPHP\Frontend\Controllers;
 use Phalcon\Mvc\Controller;
 use NagatoPHP\Models\Category as Category;
+use NagatoPHP\Models\CategorySub as CategorySub;
 
 /**
  *
@@ -46,17 +47,21 @@ class ControllerBase extends Controller {
 		if($cacheCategory == NULL){
 			$categorys = Category::find();
 			foreach($categorys as $category){
-				$file = __DIR__ . '/../../config/category/' . $category->name . '.json';
-				if(is_readable($file)){
+				$subs = array();
+				foreach(CategorySub::findByCid($category->cid) as $sub){
 					$tags = array();
-					foreach(json_decode(file_get_contents($file), TRUE) as $key => $tag){
-						$tag['items'] = empty($tag['item']) ? array() : array_map('trim', explode(',', $tag['item']));
-						unset($tag['item']);
-						$tags[$key] = $tag;
+					$file = __DIR__ . '/../../config/category/' . $sub->sid . '.json';
+					if(is_readable($file)){
+						foreach(json_decode(file_get_contents($file), TRUE) as $key => $tag){
+							$tag['items'] = empty($tag['item']) ? array() : array_map('trim', explode(',', $tag['item']));
+							unset($tag['item']);
+							$tags[$key] = $tag;
+						}
 					}
-					$cacheCategory[$category->cid] = array('name' => $category->name, 'title' => $category->title, 'tags' => $tags);
-					$cacheCategory[$category->name] = array('cid' => $category->cid, 'title' => $category->title, 'tags' => $tags);
+					$subs[$sub->sid] = array('title' => $sub->title, 'tags' => $tags);
 				}
+				$cacheCategory[$category->cid] = array('name' => $category->name, 'title' => $category->title, 'default' => $category->default, 'subs' => $subs);
+				$cacheCategory[$category->name] = array('cid' => $category->cid, 'title' => $category->title, 'default' => $category->default, 'subs' => $subs);
 			}
 			$this->cache->save('category', $cacheCategory);
 		}

@@ -5,7 +5,7 @@ namespace NagatoPHP\Frontend\Controllers;
 class IndexController extends ControllerBase {
 
     public function indexAction(){
-		echo "Index/index";
+		var_dump($this->cache->get('category'));
     }
 }
 
