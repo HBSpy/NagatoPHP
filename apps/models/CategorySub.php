@@ -3,8 +3,14 @@
 namespace NagatoPHP\Models;
 use Phalcon\Mvc\Model\Validator\Uniqueness;
 
-class Category extends \Phalcon\Mvc\Model
+class CategorySub extends \Phalcon\Mvc\Model
 {
+
+    /**
+     *
+     * @var integer
+     */
+    public $sid;
 
     /**
      *
@@ -25,30 +31,15 @@ class Category extends \Phalcon\Mvc\Model
     public $title;
 
     /**
-     *
-     * @var integer
-     */
-    public $default;
-
-	public function validation(){ 
-		$this->validate(new Uniqueness(array(
-			'field' => 'name',
-			'message' => '该分区标识已存在',
-		)));
-
-		return $this->validationHasFailed() != TRUE;
-	}
-
-    /**
      * Independent Column Mapping.
      */
     public function columnMap()
     {
         return array(
+            'sid' => 'sid', 
             'cid' => 'cid', 
             'name' => 'name', 
             'title' => 'title', 
-            'default' => 'default', 
         );
     }
 

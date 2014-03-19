@@ -1,77 +1,39 @@
-<div class="container">
-	<div class="page-header">
-		<h1>分区管理 <button id="add" type="button" class="btn btn-success btn-lg pull-right">添加</button></h1>
+<form class="form-inline well" id="form-category" style="display:none;">
+	<div class="form-group">
+		<label class="sr-only" for="title">名称</label>
+		<input type="text" name="title" id="title" class="form-control" placeholder="名称" required="required" />
 	</div>
-	<form class="form-inline well" id="form-category" style="display:none;">
-		<div class="form-group">
-			<label class="sr-only" for="title">名称</label>
-			<input type="text" name="title" id="title" class="form-control" placeholder="名称" required="required" />
-		</div>
-		<div class="form-group">
-			<label class="sr-only" for="name" id="label_name">标识</label>
-			<input type="text" name="name" id="name" class="form-control" placeholder="标识" required="required" />
-			<span class="glyphicon glyphicon-warning-sign form-control-feedback hide"></span>
-		</div>
-		<button type="submit" class="btn btn-default">提交</button>
-	</form>
-	{% for category in categorys %}
-		<div class="panel panel-primary">
-			<div class="panel-heading"><strong>{{ category.title }}</strong>
-				<span class="glyphicon glyphicon-plus pull-right add-tag" style="cursor:pointer;" cid="{{ category.cid }}"></span>
-				<span class="glyphicon glyphicon-minus pull-right remove" style="cursor:pointer; margin-right:10px;" cid="{{ category.cid }}"></span>
-			</div>
-			<form class="form-inline well" id="form-tag-{{ category.cid }}" style="display:none;">
-				<div class="form-group">
-					<label class="sr-only" for="tag">TAG</label>
-					<input type="text" name="tag" id="tag" class="form-control" placeholder="TAG1, TAG2 ..." required="required" />
-				</div>
-				<div class="form-group">
-					<label class="sr-only" for="title">名称</label>
-					<input type="text" name="title" id="title" class="form-control" placeholder="名称" required="required" />
-				</div>
-				<div class="form-group">
-					<label class="sr-only" for="item">标签项</label>
-					<input type="text" name="item" id="item" class="form-control" placeholder="标签项，逗号分隔" />
-				</div>
-				<div class="form-group">
-					<label class="sr-only" for="help">帮助信息</label>
-					<input type="text" name="help" id="help" class="form-control" placeholder="帮助信息" />
-				</div>
-				<div class="checkbox">
-					<label>
-						<input type="checkbox" name="search"> 搜索项
-					</label>
-				</div>
-				<button type="submit" class="btn btn-default">提交</button>
-			</form>
-			<table class="table table-hover">
-				<thead>
-					<tr>
-						<th>TAG</th>
-						<th>名称</th>
-						<th>标签项</th>
-						<th>帮助信息</th>
-						<th>搜索项</th>
-						<th>操作</th>
-					</tr>
-				</thead>
-				<tbody>
-					{% for key, ctag in category.tags %}
-					<tr>
-						<td>{{ key }}
-						<td>{{ ctag.title }}</td>
-						<td>{{ ctag.item }}</td>
-						<td>{{ ctag.help }}</td>
-						<td>{% if ctag.search %}是{% else %}否{% endif %}</td>
-						<td>
-							<span class="glyphicon glyphicon-remove remove-tag" style="cursor:pointer;" cid="{{ category.cid }}" tag="{{ key }}"></span>
-						</td>
-					</tr>
-					{% endfor %}
-				</tbody>
-			</table>
-		</div>
-	{% endfor %}
+	<div class="form-group">
+		<label class="sr-only" for="name" id="label_name">标识</label>
+		<input type="text" name="name" id="name" class="form-control" placeholder="标识" required="required" />
+		<span class="glyphicon glyphicon-warning-sign form-control-feedback hide"></span>
+	</div>
+	<button type="submit" class="btn btn-default pull-right">提交</button>
+</form>
+<div class="panel panel-primary">
+	<div class="panel-heading"><strong>分区</strong></div>
+	<table class="table table-striped table-hover">
+		<thead>
+			<tr>
+				<th>#</th>
+				<th>名称</th>
+				<th>标识</th>
+				<th>操作</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for category in categorys %}
+			<tr>
+				<td>{{ category.cid }}</td>
+				<td>{{ category.title }}</td>
+				<td>{{ category.name }}</td>
+				<td>
+					<span class="glyphicon glyphicon-remove remove" cid="{{ category.cid }}" style="cursor:pointer;"></span>
+				</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
 </div>
 <script>
 	$('#add').click(function (){
@@ -79,38 +41,11 @@
 			$.post('{{ url('admin/category/add') }}', $(this).serialize(), function (data){
 				if(data.success){
 					window.location.reload();
-				} else {
+					} else {
 					$('#label_name').html(data[0].error).removeClass('sr-only').addClass('control-label').next().focus().next().removeClass('hide').parent().addClass('has-warning has-feedback');
 				}
 			});
 			return false;
-		});
-	});
-
-	$('.add-tag').click(function (){
-		var cid = $(this).attr('cid');
-		$('#form-tag-' + cid).toggle('fast').submit(function (){
-			$.post('{{ url('admin/category/addtag')}}/' + cid, $(this).serialize(), function (data){
-				if(data.success){
-					window.location.reload();
-				} else {
-					alert(data.error);
-				}
-
-			});
-			return false;
-		});
-	});
-
-	$('.remove-tag').click(function (){
-		var cid = $(this).attr('cid');
-		var tag = $(this).attr('tag');
-		$.post('{{ url('admin/category/removetag')}}/' + cid, {removetag: tag}, function (data){
-			if(data.success){
-				window.location.reload();
-			} else {
-				alert(data.error);
-			}
 		});
 	});
 
@@ -119,7 +54,7 @@
 		$.post('{{ url('admin/category/remove')}}/' + cid, null, function (data){
 			if(data.success){
 				window.location.reload();
-			} else {
+				} else {
 				alert(data.error);
 			}
 		});

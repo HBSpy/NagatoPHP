@@ -25,7 +25,38 @@ $router->add('/admin/category/:action/:int', array(
 	'module' => 'backend',
 	'controller' => 'category',
 	'action' => 1,
-	'cid' => 2,
+	'sid' => 2,
+));
+
+$router->add('/admin/category/{category:[a-zA-Z]+}', array(
+	'namespace' => 'NagatoPHP\Backend\Controllers',
+	'module' => 'backend',
+	'controller' => 'category',
+	'action' => 'view',
+));
+
+$router->add('/admin/category/setdefault/:int', array(
+	'namespace' => 'NagatoPHP\Backend\Controllers',
+	'module' => 'backend',
+	'controller' => 'category',
+	'action' => 'setdefault',
+	'cid' => 1,
+));
+
+$router->add('/admin/category/addsub/:int', array(
+	'namespace' => 'NagatoPHP\Backend\Controllers',
+	'module' => 'backend',
+	'controller' => 'category',
+	'action' => 'addsub',
+	'cid' => 1,
+));
+
+$router->add('/admin/category/remove/:int', array(
+	'namespace' => 'NagatoPHP\Backend\Controllers',
+	'module' => 'backend',
+	'controller' => 'category',
+	'action' => 'remove',
+	'cid' => 1,
 ));
 
 $router->add('/admin/category/add', array(
