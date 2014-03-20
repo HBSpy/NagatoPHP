@@ -19,7 +19,7 @@ $router->add('/admin', array(
 	'controller' => 'index',
 ));
 
-// Category
+// {{{ 分区管理
 $router->add('/admin/category/:action/:int', array(
 	'namespace' => 'NagatoPHP\Backend\Controllers',
 	'module' => 'backend',
@@ -71,11 +71,19 @@ $router->add('/admin/category', array(
 	'module' => 'backend',
 	'controller' => 'category',
 ));
+//}}}
 
-// Torrent
+// {{{ 种子
+$router->add('/upload/{category:[a-zA-Z]+}/:int', array(
+	'controller' => 'torrent',
+	'action' => 'add',
+	'category' => 1,
+	'sid' => 2,
+));
 $router->add('/upload/{category:[a-zA-Z]+}', array(
 	'controller' => 'torrent',
 	'action' => 'add',
 ));
+// }}}
 
 return $router;

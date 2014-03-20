@@ -2,7 +2,17 @@
 	<div class="page-header">
 		<h1>{{ category['title'] }} <small>发布规则</small></h1>
 	</div>
-	<form class="form-horizontal" role="form" id="uploadform">
+	<form class="form-horizontal" role="form" id="uploadform" method="POST">
+		<div class="form-group">
+			<label for="sub" class="col-sm-2 control-label">二级分类</label>
+			<div class="col-sm-10">
+				<ul class="nav nav-pills">
+					{% for key, sub in category['subs'] %}
+					<li {{ key == sid ? 'class="active"' : '' }}><a href="{{ url('upload/' ~ dispatcher.getParam('category')) ~ '/' ~ key}}">{{ sub['title'] }}</a>
+					{% endfor %}
+				</ul>
+			</div>
+		</div>
 		<div class="form-group">
 			<label for="torrent" class="col-sm-2 control-label">种子文件</label>
 			<div class="col-sm-10">
@@ -27,7 +37,7 @@
 				<input type="text" class="form-control" id="subtitle" name="subtitle">
 			</div>
 		</div>
-		{% for key, ctag in category['tags'] %}
+		{% for key, ctag in category['subs'][sid]['tags'] %}
 		<div class="form-group">
 			<label for="{{ key }}" class="col-sm-2 control-label">{{ ctag['title'] }}</label>
 			<div class="col-sm-2">
@@ -64,22 +74,21 @@
 			</div>
 		</div>
 	</form>
-	<pre>{{ content() }}</pre>
 </div>
+{{ javascript_include('js/jquery.form.js') }}
 <script>
 	$('.item').click(function (){
 		var tag = $(this).attr('tag');
-		$('#' + tag).attr('value', $(this).html());
+		$('#' + tag).prop('value', $(this).html());
 	});
 
 	$('.other').click(function (){
 		var tag = $(this).attr('tag');
-		$('#' + tag).attr('value', '').focus();
+		$('#' + tag).prop('value', '').focus();
 	});
 
-	$('#uploadform').submit(function (){
-		$.post(null, $(this).serialize(), function (data){
+	$(function (){
+		$('#uploadform').ajaxForm(function (data){
 		});
-		return false;
 	});
 </script>

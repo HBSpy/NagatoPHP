@@ -1,23 +1,11 @@
 <?php
+namespace NagatoPHP\Common;
+use Phalcon\Mvc\User\Component; 
 /**
  * Torrent
  *
  * PHP version 5.2+ (with cURL extention enabled)
  *
- * LICENSE: This source file is subject to version 3 of the GNU GPL
- * that is available through the world-wide-web at the following URI:
- * http://www.gnu.org/licenses/gpl.html. If you did not receive a copy of
- * the GNU GPL License and are unable to obtain it through the web, please
- * send a note to adrien.gibrat@gmail.com so I can mail you a copy.
- *
- * 1) Features:
- * - Decode torrent file or data from local file and distant url
- * - Build torrent from source folder/file(s) or distant url
- * - Super easy usage & syntax
- * - Silent Exception error system
- *
- * 2) Usage example
- * <code>
 require_once 'Torrent.php';
 
 // create torrent
@@ -34,6 +22,7 @@ echo '<pre>private: ', $torrent->is_private() ? 'yes' : 'no',
 var_dump( $torrent->announce() );
 echo '<br>name: ', $torrent->name(),
 	 '<br>comment: ', $torrent->comment(),
+	 '<br>source: ', $torrent->source(),
 	 '<br>piece_length: ', $torrent->piece_length(),
 	 '<br>size: ', $torrent->size( 2 ),
 	 '<br>hash info: ', $torrent->hash_info(),
@@ -51,6 +40,7 @@ $torrent->announce(array('http://torrent.tracker/annonce', 'http://alternate-tor
 $torrent->announce(array(array('http://torrent.tracker/annonce', 'http://alternate-torrent.tracker/annonce'), 'http://another-torrent.tracker/annonce')); // set tiered trackers
 $torrent->comment('hello world');
 $torrent->name('test torrent');
+$torrent->source('source');
 $torrent->is_private(true);
 $torrent->httpseeds('http://file-hosting.domain/path/'); // Bittornado implementation
 $torrent->url_list(array('http://file-hosting.domain/path/','http://another-file-hosting.domain/path/')); // GetRight implementation
@@ -62,13 +52,8 @@ if ( $errors = $torrent->errors() ) // errors method return the error stack
 // send to user
 //$torrent->send();
  * </code>
- *
- * @author   Adrien Gibrat <adrien.gibrat@gmail.com>
- * @tester   Jeong, official tester ;) Thanks for your precious feedback
- * @copyleft 2010 - Just use it!
- * @license  http://www.gnu.org/licenses/gpl.html GNU General Public License version 3
- * @version  Release: 1.2 (6 july 2010)
  */
+
 class Torrent {
 	
 	/**
@@ -183,6 +168,16 @@ class Torrent {
 		return is_null( $name ) ?
 			isset( $this->info['name'] ) ? $this->info['name'] : null :
 			$this->touch( $this->info['name'] = (string) $name );
+	}
+
+	/** Getter and setter of source
+	 * @param null|string source (optional, if omitted it's a getter)
+	 * @return string|null source or null if not set
+	 */
+	public function source ( $source = null ) {
+		return is_null( $source ) ?
+			isset( $this->info['source'] ) ? $this->info['source'] : null :
+			$this->touch( $this->info['source'] = (string) $source );
 	}
 
 	/** Getter and setter of private flag
@@ -322,10 +317,13 @@ class Torrent {
 			while ( $done = curl_multi_info_read( $curl ) ) {
 				$info = curl_getinfo( $done['handle'] );
             	$tracker = array_shift( explode( '?', $info['url'], 2 ) );
-            	if ( empty( $info['http_code'] ) )
-            		continue $scrape[$tracker] = self::set_error( new Exception( 'Tracker request timeout (' . $timeout . 's)' ), true );
-            	elseif ( $info['http_code'] != 200 )
-            		continue $scrape[$tracker] = self::set_error( new Exception( 'Tracker request failed (' . $info['http_code'] . ' code)' ), true );
+            	if ( empty( $info['http_code'] ) ){
+            		$scrape[$tracker] = self::set_error( new Exception( 'Tracker request timeout (' . $timeout . 's)' ), true );
+					continue;
+				} elseif ( $info['http_code'] != 200 ){
+            		$scrape[$tracker] = self::set_error( new Exception( 'Tracker request failed (' . $info['http_code'] . ' code)' ), true );
+					continue;
+				}
 				$stats = self::decode_data( curl_multi_getcontent( $done['handle']  ) );
 				curl_multi_remove_handle( $curl, $done['handle'] );
 				$scrape[$tracker] = empty( $stats['files'] ) ?
@@ -542,13 +540,13 @@ class Torrent {
 			return false;
 	}
 
-	/** Set torrent creator and creation date
+	/** Operate the torrent freeeeeeeeeeeeeeeeeeeeeeeeee
 	 * @param any param
 	 * @return any param
 	 */
 	protected function touch ( $void = null ) {
-		$this->{'created by'}		= 'Torrent PHP Class - Adrien Gibrat';
-		$this->{'creation date'}	= time();
+		// Remove cached peers (Bitcomet & Azareus)
+		unset($this->{'nodes'});
 		return $void;
 	}
 
@@ -658,10 +656,14 @@ class Torrent {
 		$path	= explode( DIRECTORY_SEPARATOR, dirname( realpath( current( $files ) ) ) );
 		$pieces = null; $info_files = array(); $count = count($files) - 1;
 		foreach ( $files as $i => $file ) {
-			if ( $path != array_intersect_assoc( $file_path = explode( DIRECTORY_SEPARATOR, $file ), $path ) )
-				continue self::set_error( new Exception( 'Files must be in the same folder: "' . $file . '" discarded' ) );
-			if ( ! $handle = self::fopen( $file, $filesize = self::filesize( $file ) ) )
-				continue self::set_error( new Exception( 'Failed to open file: "' . $file . '" discarded' ) );
+			if ( $path != array_intersect_assoc( $file_path = explode( DIRECTORY_SEPARATOR, $file ), $path ) ){
+				self::set_error( new Exception( 'Files must be in the same folder: "' . $file . '" discarded' ) );
+				continue;
+			}
+			if ( ! $handle = self::fopen( $file, $filesize = self::filesize( $file ) ) ){
+				self::set_error( new Exception( 'Failed to open file: "' . $file . '" discarded' ) );
+				continue;
+			}
 			$pieces .= $this->pieces( $handle, $piece_length, $count == $i );
 			$info_files[] = array(
 				'length'	=> $filesize,

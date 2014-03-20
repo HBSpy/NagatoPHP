@@ -2,7 +2,17 @@
 	<div class="page-header">
 		<h1><?php echo $category['title']; ?> <small>发布规则</small></h1>
 	</div>
-	<form class="form-horizontal" role="form" id="uploadform">
+	<form class="form-horizontal" role="form" id="uploadform" method="POST">
+		<div class="form-group">
+			<label for="sub" class="col-sm-2 control-label">二级分类</label>
+			<div class="col-sm-10">
+				<ul class="nav nav-pills">
+					<?php foreach ($category['subs'] as $key => $sub) { ?>
+					<li <?php echo ($key == $sid ? 'class="active"' : ''); ?>><a href="<?php echo $this->url->get('upload/' . $this->dispatcher->getParam('category')) . '/' . $key; ?>"><?php echo $sub['title']; ?></a>
+					<?php } ?>
+				</ul>
+			</div>
+		</div>
 		<div class="form-group">
 			<label for="torrent" class="col-sm-2 control-label">种子文件</label>
 			<div class="col-sm-10">
@@ -27,7 +37,7 @@
 				<input type="text" class="form-control" id="subtitle" name="subtitle">
 			</div>
 		</div>
-		<?php foreach ($category['tags'] as $key => $ctag) { ?>
+		<?php foreach ($category['subs'][$sid]['tags'] as $key => $ctag) { ?>
 		<div class="form-group">
 			<label for="<?php echo $key; ?>" class="col-sm-2 control-label"><?php echo $ctag['title']; ?></label>
 			<div class="col-sm-2">
@@ -64,22 +74,21 @@
 			</div>
 		</div>
 	</form>
-	<pre><?php echo $this->getContent(); ?></pre>
 </div>
+<?php echo $this->tag->javascriptInclude('js/jquery.form.js'); ?>
 <script>
 	$('.item').click(function (){
 		var tag = $(this).attr('tag');
-		$('#' + tag).attr('value', $(this).html());
+		$('#' + tag).prop('value', $(this).html());
 	});
 
 	$('.other').click(function (){
 		var tag = $(this).attr('tag');
-		$('#' + tag).attr('value', '').focus();
+		$('#' + tag).prop('value', '').focus();
 	});
 
-	$('#uploadform').submit(function (){
-		$.post(null, $(this).serialize(), function (data){
+	$(function (){
+		$('#uploadform').ajaxForm(function (data){
 		});
-		return false;
 	});
 </script>
