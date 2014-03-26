@@ -54,7 +54,7 @@ if ( $errors = $torrent->errors() ) // errors method return the error stack
  * </code>
  */
 
-class Torrent {
+class Torrent extends Component {
 	
 	/**
 	* @const float Default http timeout
@@ -364,16 +364,18 @@ class Torrent {
 	 * @return string torrent encoded data
 	 */
 	static public function encode ( $mixed ) {
-		switch ( gettype( $mixed ) ) {
-			case 'integer':
-			case 'double':
-				return self::encode_integer( $mixed );
-            case 'object':
-            	$mixed = (array) $mixed; //Thanks to W-Shadow: http://w-shadow.com/blog/2008/11/11/parse-edit-and-create-torrent-files-with-php/
-            case 'array':
-				return self::encode_array( $mixed );
-			default:
-				return self::encode_string( (string) $mixed );
+		if(is_int($mixed) || is_bool($mixed) || is_float($mixed)){
+			return self::encode_integer( $mixed );
+		}
+		if(is_object($mixed)){
+			$mixed = (array) $mixed;
+			return self::encode_array( $mixed );
+		}
+		if(is_array($mixed)){
+			return self::encode_array( $mixed );
+		}
+		if(is_string($mixed)){
+			return self::encode_string( (string) $mixed );
 		}
 	}
 

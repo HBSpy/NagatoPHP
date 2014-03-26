@@ -6,7 +6,19 @@ use NagatoPHP\Models\Torrent as Torrent;
 
 class TorrentController extends ControllerBase {
 
-    public function indexAction(){
+	public function indexAction($category = NULL){
+		$categorys = $this->cache->get('category');
+		$this->view->categorys = $categorys;
+		if(array_key_exists($category, $categorys)){
+			$category = $categorys[$category];
+			$this->view->subs = $category['subs'];
+			$sid = $this->dispatcher->getParam('sid');
+			$sub = $sid ? $category['subs'][$sid] : $category['subs'] [$category['default']];
+			$this->view->tags = $sub['tags'];
+		}
+
+		$torrents = Torrent::find();
+		$this->view->torrents = $torrents;
     }
 
 	/**
@@ -55,10 +67,10 @@ class TorrentController extends ControllerBase {
 							var_dump($ret);
 						}
 					} else {
-						$this->ajax->ajaxReturn(array('error' => 'ERRORTYPE'));
+						$this->tool->ajaxReturn(array('error' => 'ERRORTYPE'));
 					}
 				} else {
-					$this->ajax->ajaxReturn(array('error' => 'NOFILE'));
+					$this->tool->ajaxReturn(array('error' => 'NOFILE'));
 				}
 			}
 		} else {

@@ -56,7 +56,7 @@
 				$('#div_username').removeClass('has-warning has-feedback');
 				$('#label_username').addClass('hide').empty().next().next().addClass('hide');
 			} else {
-				window.location.reload();
+			//	window.location.reload();
 			}
 
 		});

@@ -28,15 +28,18 @@ class CategoryController extends ControllerBase {
 	 * @Param 	category 	分区名
 	 */
 	public function viewAction($category){
-		$currentCategory = Category::findFirstByName($category);
-		$this->view->currentCategory = $currentCategory;
-		$subs = array();
-		foreach(CategorySub::findByCid($currentCategory->cid) as $sub){
-			$file = __DIR__ . '/../../config/category/' . $sub->sid . '.json';
-			$tags = is_readable($file) ? json_decode(file_get_contents($file), TRUE) : array();
-			$subs[$sub->sid] = array('title' => $sub->title, 'tags' => $tags);
+		if($currentCategory = Category::findFirstByName($category)){
+			$this->view->currentCategory = $currentCategory;
+			$subs = array();
+			foreach(CategorySub::findByCid($currentCategory->cid) as $sub){
+				$file = __DIR__ . '/../../config/category/' . $sub->sid . '.json';
+				$tags = is_readable($file) ? json_decode(file_get_contents($file), TRUE) : array();
+				$subs[$sub->sid] = array('title' => $sub->title, 'tags' => $tags);
+			}
+			$this->view->subs = $subs;
+		} else {
+			$this->flash->warning("该分区不存在");
 		}
-		$this->view->subs = $subs;
 	}
 
 	/**
@@ -52,12 +55,12 @@ class CategoryController extends ControllerBase {
 			$category = new Category();
 			if($category->create($this->request->getPost(), array('name', 'title'))){
 				$this->cache->delete('category');
-				$this->ajax->ajaxReturn(array('success' => TRUE));
+				$this->tool->ajaxReturn(array('success' => TRUE));
 			} else {
 				foreach($category->getMessages() as $message){
 					$ret[]= array('field' => $message->getField(), 'error' => $message->getMessage());
 				}
-				$this->ajax->ajaxReturn($ret);
+				$this->tool->ajaxReturn($ret);
 			}
 		}
 	}
@@ -78,9 +81,9 @@ class CategoryController extends ControllerBase {
 			}
 			if($category->delete()){
 				$this->cache->delete('category');
-				$this->ajax->ajaxReturn(array('success' => TRUE));
+				$this->tool->ajaxReturn(array('success' => TRUE));
 			} else {
-				$this->ajax->ajaxReturn(array('error' => '竟然失败了'));
+				$this->tool->ajaxReturn(array('error' => '竟然失败了'));
 			}
 		}
 	}
@@ -107,9 +110,9 @@ class CategoryController extends ControllerBase {
 					$category->update();	
 				}
 				$this->cache->delete('category');
-				$this->ajax->ajaxReturn(array('success' => TRUE));
+				$this->tool->ajaxReturn(array('success' => TRUE));
 			} else {
-				$this->ajax->ajaxReturn(array('error' => '竟然失败了'));
+				$this->tool->ajaxReturn(array('error' => '竟然失败了'));
 			}
 		}
 	}
@@ -127,9 +130,9 @@ class CategoryController extends ControllerBase {
 			$category = Category::findFirst($cid);
 			$category->default = $this->request->getPost('sid');
 			if($category->update()){
-				$this->ajax->ajaxReturn(array('success' => TRUE));
+				$this->tool->ajaxReturn(array('success' => TRUE));
 			} else {
-				$this->ajax->ajaxReturn(array('error' => '竟然失败了'));
+				$this->tool->ajaxReturn(array('error' => '竟然失败了'));
 			}
 		}
 	}
@@ -146,9 +149,9 @@ class CategoryController extends ControllerBase {
 			$sub = CategorySub::findFirst($sid);
 			@unlink(__DIR__ . '/../../config/category/' . $sid . '.json');
 			if($sub->delete()){
-				$this->ajax->ajaxReturn(array('success' => TRUE));
+				$this->tool->ajaxReturn(array('success' => TRUE));
 			} else {
-				$this->ajax->ajaxReturn(array('error' => '竟然失败了'));
+				$this->tool->ajaxReturn(array('error' => '竟然失败了'));
 			}
 		}
 	}
@@ -178,9 +181,9 @@ class CategoryController extends ControllerBase {
 			$tags = array_merge($tags, $newtag);
 			if(file_put_contents($file, json_encode($tags))){
 				$this->cache->delete('category');
-				$this->ajax->ajaxReturn(array('success' => TRUE));
+				$this->tool->ajaxReturn(array('success' => TRUE));
 			} else {
-				$this->ajax->ajaxReturn(array('error' => "文件 {$file} 不可写入"));
+				$this->tool->ajaxReturn(array('error' => "文件 {$file} 不可写入"));
 			}
 		}
 	}
@@ -202,9 +205,9 @@ class CategoryController extends ControllerBase {
 			unset($tags[$removetag]);
 			if(file_put_contents($file, json_encode($tags))){
 				$this->cache->delete('category');
-				$this->ajax->ajaxReturn(array('success' => TRUE));
+				$this->tool->ajaxReturn(array('success' => TRUE));
 			} else {
-				$this->ajax->ajaxReturn(array('error' => "文件 {$file} 不可写入"));
+				$this->tool->ajaxReturn(array('error' => "文件 {$file} 不可写入"));
 			}
 		}
 	}

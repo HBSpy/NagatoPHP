@@ -37,10 +37,10 @@
 			</ul>
 			</li>
 		</ul>
-		<form class="navbar-form" role="search" style="display:inline-table;">
+		<form class="navbar-form" role="search" style="display:inline-table;" action="<?php echo $this->url->get('torrent'); ?>">
 			<div class="form-group">
 				<div class="input-group">
-					<input type="text" class="form-control" placeholder="热门：父爱如山" />
+					<input type="text" name="key" id="key" class="form-control" placeholder="热门：父爱如山" />
 					<span class="input-group-btn">
 						<button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
 					</span>

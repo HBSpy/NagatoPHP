@@ -73,6 +73,21 @@ $router->add('/admin/category', array(
 ));
 //}}}
 
+// {{{ 客户端管理
+$router->add('/admin/agent', array(
+	'namespace' => 'NagatoPHP\Backend\Controllers',
+	'module' => 'backend',
+	'controller' => 'agent',
+));
+
+$router->add('/admin/agent/:action', array(
+	'namespace' => 'NagatoPHP\Backend\Controllers',
+	'module' => 'backend',
+	'controller' => 'agent',
+	'action' => 1,
+));
+// }}}
+
 // {{{ 种子
 $router->add('/upload/{category:[a-zA-Z]+}/:int', array(
 	'controller' => 'torrent',
@@ -84,6 +99,27 @@ $router->add('/upload/{category:[a-zA-Z]+}', array(
 	'controller' => 'torrent',
 	'action' => 'add',
 ));
+$router->add('/torrent/{category:[a-zA-Z]+}/:int', array(
+	'controller' => 'torrent',
+	'action' => 'index',
+	'category' => 1,
+	'sid' => 2,
+));
+$router->add('/torrent/{category:[a-zA-Z]+}', array(
+	'controller' => 'torrent',
+	'action' => 'index',
+	'category' => 1,
+));
+$router->add('/torrent', array(
+	'controller' => 'torrent',
+));
 // }}}
 
+// {{{ Tracker
+$router->add('/announce.php', array(
+	'namespace' => 'NagatoPHP\Tracker\Controllers',
+	'module' => 'tracker',
+	'controller' => 'index',
+));
+// }}}
 return $router;

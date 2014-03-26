@@ -11,7 +11,6 @@ use Phalcon\Db\Adapter\Pdo\Mysql as DbAdapter;
 use Phalcon\Flash\Session as Flash;
 use Phalcon\Cache\Frontend\Data as DataFrontend;
 use Phalcon\Cache\Backend\Xcache as XcacheBackend;
-use Phalcon\Security;
 
 /**
  * FactoryDefault
@@ -67,31 +66,22 @@ $di['flash'] = function () {
  */
 $di['cache'] = function () {
 	$datafront = new DataFrontend(array(
-//		'lifetime' => 0,
+		'lifetime' => 0,
 	));
 	$cache = new XcacheBackend($datafront, array(
-		'prefix' => '_nagato',
+		'prefix' => 'nagato_',
 	));
 
 	return $cache;
 };
 
 /**
- * Security
+ * Some useful tools 
  */
-$di['security'] = function () {
-	$security = new Security();
+$di['tool'] = function () {
+	$tool = new NagatoPHP\Common\Tool();
 
-	return $security;
-};
-
-/**
- * Ajax
- */
-$di['ajax'] = function () {
-	$ajax = new NagatoPHP\Common\Ajax();
-
-	return $ajax;
+	return $tool;
 };
 
 /**
