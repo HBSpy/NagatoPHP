@@ -10,31 +10,23 @@
 	</div>
 	<button type="submit" class="btn btn-default pull-right">提交</button>
 </form>
+{% for agent in agents %}
 <div class="panel panel-primary">
-	<div class="panel-heading"><strong>分区</strong></div>
-	<table class="table table-striped table-hover">
-		<thead>
-			<tr>
-				<th>#</th>
-				<th>名称</th>
-				<th>标识</th>
-				<th>操作</th>
-			</tr>
-		</thead>
-		<tbody>
-			{% for nav in navs %}
-			<tr>
-				<td>{{ nav.cid }}</td>
-				<td>{{ nav.title }}</td>
-				<td>{{ nav.name }}</td>
-				<td>
-					<span class="glyphicon glyphicon-remove remove" cid="{{ nav.cid }}" style="cursor:pointer;"></span>
-				</td>
-			</tr>
-			{% endfor %}
-		</tbody>
+	<div class="panel-heading"><strong># {{ agent.fid }} - {{ agent.family }}</strong>
+		<span class="glyphicon glyphicon-remove pull-right remove" aid="{{ agent.aid }}" style="cursor:pointer;"></span>
+	</div>
+	<table class="table table-condensed">
+		<tr>
+			<th>PEER_ID 表达式</th>
+			<td>{{ agent.peer_id_pattern }}</td>
+		</tr>
+		<tr>
+			<th>命中统计</th>
+			<td>{{ agent.hits }}</td>
+		</tr>
 	</table>
 </div>
+{% endfor %}
 <script>
 	$('#add').click(function (){
 		$('#form-category').toggle('fast').submit(function (){
@@ -50,13 +42,14 @@
 	});
 
 	$('.remove').click(function (){
-		var cid = $(this).attr('cid');
-		$.post('{{ url('admin/category/remove')}}/' + cid, null, function (data){
+		var aid = $(this).attr('aid');
+		$.post('{{ url('admin/agent/removefamily')}}/' + aid, null, function (data){
 			if(data.success){
 				window.location.reload();
-				} else {
+			} else {
 				alert(data.error);
 			}
 		});
 	});
 </script>
+{{ content() }}

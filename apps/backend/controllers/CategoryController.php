@@ -14,7 +14,7 @@ class CategoryController extends ControllerBase {
 
 	public function initialize(){
 		parent::initialize();
-		$this->view->categorys = Category::find();
+		$this->view->navs = Category::find();
 	}
 
 

@@ -10,35 +10,27 @@
 	</div>
 	<button type="submit" class="btn btn-default pull-right">提交</button>
 </form>
+<?php foreach ($agents as $agent) { ?>
 <div class="panel panel-primary">
-	<div class="panel-heading"><strong>分区</strong></div>
-	<table class="table table-striped table-hover">
-		<thead>
-			<tr>
-				<th>#</th>
-				<th>名称</th>
-				<th>标识</th>
-				<th>操作</th>
-			</tr>
-		</thead>
-		<tbody>
-			{% for nav in navs %}
-			<tr>
-				<td>{{ nav.cid }}</td>
-				<td>{{ nav.title }}</td>
-				<td>{{ nav.name }}</td>
-				<td>
-					<span class="glyphicon glyphicon-remove remove" cid="{{ nav.cid }}" style="cursor:pointer;"></span>
-				</td>
-			</tr>
-			{% endfor %}
-		</tbody>
+	<div class="panel-heading"><strong># <?php echo $agent->fid; ?> - <?php echo $agent->family; ?></strong>
+		<span class="glyphicon glyphicon-remove pull-right remove" aid="<?php echo $agent->aid; ?>" style="cursor:pointer;"></span>
+	</div>
+	<table class="table table-condensed">
+		<tr>
+			<th>PEER_ID 表达式</th>
+			<td><?php echo $agent->peer_id_pattern; ?></td>
+		</tr>
+		<tr>
+			<th>命中统计</th>
+			<td><?php echo $agent->hits; ?></td>
+		</tr>
 	</table>
 </div>
+<?php } ?>
 <script>
 	$('#add').click(function (){
 		$('#form-category').toggle('fast').submit(function (){
-			$.post('{{ url('admin/category/add') }}', $(this).serialize(), function (data){
+			$.post('<?php echo $this->url->get('admin/category/add'); ?>', $(this).serialize(), function (data){
 				if(data.success){
 					window.location.reload();
 					} else {
@@ -50,13 +42,14 @@
 	});
 
 	$('.remove').click(function (){
-		var cid = $(this).attr('cid');
-		$.post('{{ url('admin/category/remove')}}/' + cid, null, function (data){
+		var aid = $(this).attr('aid');
+		$.post('<?php echo $this->url->get('admin/agent/removefamily'); ?>/' + aid, null, function (data){
 			if(data.success){
 				window.location.reload();
-				} else {
+			} else {
 				alert(data.error);
 			}
 		});
 	});
 </script>
+<?php echo $this->getContent(); ?>

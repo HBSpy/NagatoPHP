@@ -10,8 +10,8 @@
 		<div class="col-md-2">
 			<ul class="nav nav-pills nav-stacked">
 				<li <?php echo ($this->dispatcher->getParam('category') ? '' : 'class="active"'); ?>><a href="<?php echo $this->url->get('admin/category'); ?>">首页</a></li>
-				<?php foreach ($categorys as $category) { ?>
-				<li <?php echo ($this->dispatcher->getParam('category') == $category->name ? 'class="active"' : ''); ?>><a href="<?php echo $this->url->get('admin/category/') . $category->name; ?>"><?php echo $category->title; ?></a></li>
+				<?php foreach ($navs as $nav) { ?>
+				<li <?php echo ($this->dispatcher->getParam('category') == $nav->name ? 'class="active"' : ''); ?>><a href="<?php echo $this->url->get('admin/category/') . $nav->name; ?>"><?php echo $nav->title; ?></a></li>
 				<?php } ?>
 			</ul>
 		</div>

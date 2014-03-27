@@ -33,14 +33,8 @@
 			/* background-repeat: repeat-x; */
 			filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff542687', endColorstr='#ff04a5e6', GradientType=0);
 		}
-
-		.container {
-			position: relative;
-			background-color: #fff;
-		}
 	</style>
 	<body>
-		<div class="background"></div>
 		{{ content() }}
 	</body>
 </html>

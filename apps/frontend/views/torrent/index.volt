@@ -10,6 +10,27 @@
 		</ul>
 	</div>
 	<div class="row">
+		<form class="form-horizontal well" role="form">
+			<div class="form-group">
+				<label for="inputKey" class="col-sm-2 control-label">关键字</label>
+				<div class="col-sm-3">
+					<input type="text" name="key" class="form-control" id="inputKey">
+				</div>
+				<div class="col-sm-2">
+					<select name="promotion" class="form-control">
+						<option>优惠</option>
+						<option>FREE</option>
+						<option>2XFREE</option>
+						<option>2X</option>
+						<option>50%</option>
+						<option>2X50%</option>
+						<option>30%</option>
+					</select>
+				</div>
+			</div>
+		</form>
+	</div>
+	<div class="row well">
 		{% if subs is defined %}
 			<dl class="dl-horizontal">
 				{% if subs|length != 1 %}
@@ -42,7 +63,7 @@
 	<div class="row">
 		<table class="table table-bordered">
 			<thead>
-				<tr>
+				<tr class="active">
 					<th><span class="glyphicon glyphicon-tags"></span></th>
 					<th><span class="glyphicon glyphicon-th"></span></th>
 					<th><span class="glyphicon glyphicon-comment"></span></th>
@@ -59,15 +80,25 @@
 				<tr>
 					<td>分类</td>
 					<td>
-						<strong>[标题][很长][很长][很长][很长][很长][很长][很长][很长][很长][很长][很长][很长]</strong>
+						<strong>
+							{% if torrent.zhtitle %}[{{ torrent.zhtitle }}]{% endif %}
+							{% if torrent.entitle %}[{{ torrent.entitle }}]{% endif %}
+							{% if torrent.tag1 %}[{{ torrent.tag1 }}]{% endif %}
+							{% if torrent.tag2 %}[{{ torrent.tag2 }}]{% endif %}
+							{% if torrent.tag3 %}[{{ torrent.tag3 }}]{% endif %}
+							{% if torrent.tag4 %}[{{ torrent.tag4 }}]{% endif %}
+						</strong>
 						<span class="glyphicon glyphicon-download-alt pull-right"></span>
 						<br />
 						<span class="glyphicon glyphicon-star-empty pull-right"></span>
-						<span class="label label-success">50%</span> <small class="text-muted">这里还有副标题，等等什么乱七八糟的的东西。。。</small>
+						{% if torrent.promotion != 'NORMAL' %}
+						<span class="label label-success">{{ torrent.promotion }}</span>
+						{% endif %}
+						<small class="text-muted">{{ torrent.subtitle }}</small>
 					</td>
 					<td>0</td>
 					<td>时间</td>
-					<td>100 MB</td>
+					<td>{{ tool.mksize(torrent.size) }}</td>
 					<td>10</td>
 					<td>5</td>
 					<td>30</td>
@@ -76,7 +107,9 @@
 				{% endfor %}
 			</tbody>
 		</table>
-
+	</div>
+	<div class="row">
+		{{ pagebar }}
 	</div>
 	<pre>{{ content() }}</pre>
 </div>

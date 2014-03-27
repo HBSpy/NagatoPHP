@@ -10,8 +10,8 @@
 		<div class="col-md-2">
 			<ul class="nav nav-pills nav-stacked">
 				<li {{ dispatcher.getParam('category') ? '' : 'class="active"'}}><a href="{{ url('admin/category') }}">首页</a></li>
-				{% for category in categorys %}
-				<li {{ dispatcher.getParam('category') == category.name ? 'class="active"' : '' }}><a href="{{ url('admin/category/') ~ category.name }}">{{ category.title }}</a></li>
+				{% for nav in navs %}
+				<li {{ dispatcher.getParam('category') == nav.name ? 'class="active"' : '' }}><a href="{{ url('admin/category/') ~ nav.name }}">{{ nav.title }}</a></li>
 				{% endfor %}
 			</ul>
 		</div>

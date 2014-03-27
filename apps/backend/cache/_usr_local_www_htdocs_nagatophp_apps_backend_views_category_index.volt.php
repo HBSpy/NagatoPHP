@@ -22,13 +22,13 @@
 			</tr>
 		</thead>
 		<tbody>
-			<?php foreach ($categorys as $category) { ?>
+			<?php foreach ($navs as $nav) { ?>
 			<tr>
-				<td><?php echo $category->cid; ?></td>
-				<td><?php echo $category->title; ?></td>
-				<td><?php echo $category->name; ?></td>
+				<td><?php echo $nav->cid; ?></td>
+				<td><?php echo $nav->title; ?></td>
+				<td><?php echo $nav->name; ?></td>
 				<td>
-					<span class="glyphicon glyphicon-remove remove" cid="<?php echo $category->cid; ?>" style="cursor:pointer;"></span>
+					<span class="glyphicon glyphicon-remove remove" cid="<?php echo $nav->cid; ?>" style="cursor:pointer;"></span>
 				</td>
 			</tr>
 			<?php } ?>

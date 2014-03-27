@@ -18,6 +18,13 @@ class TorrentController extends ControllerBase {
 		}
 
 		$torrents = Torrent::find();
+		$currentPage = $this->request->getQuery('p', 'int', 1);
+		$paginator = new \Phalcon\Paginator\Adapter\Model(array(
+			'data' => $torrents,
+			'limit' => 50,
+			'page' => $currentPage,
+		));
+		$this->view->pagebar = $this->tool->getPagebar($paginator->getPaginate());
 		$this->view->torrents = $torrents;
     }
 
