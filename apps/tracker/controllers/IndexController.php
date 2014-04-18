@@ -1,11 +1,13 @@
 <?php
 
 namespace NagatoPHP\Tracker\Controllers;
+
 use NagatoPHP\Common\Torrent as Bencode;
 use NagatoPHP\Models\AgentFamily as AgentFamily;
 use NagatoPHP\Models\AgentException as AgentException;
 use NagatoPHP\Models\User as User;
 use NagatoPHP\Models\Torrent as Torrent;
+use NagatoPHP\Models\Peer as Peer;
 use Phalcon\Mvc\Model\Resultset as Resultset;
 use Phalcon\Mvc\Controller;
 
@@ -24,7 +26,7 @@ use Phalcon\Mvc\Controller;
  * 	no_peer_id 	0 || 1
  * 	event 		started || stopped || completed
  * 	ip 			(optional)
- * 	numwant 	(optional)default=50 peers
+ * 	numwant 	(optional) default=50 peers
  * 	key 		(optional)
  * 	trackerid 	(optional)
  * 
@@ -42,14 +44,16 @@ use Phalcon\Mvc\Controller;
 class IndexController extends Controller {
 
 	public function initialize(){
-		//$this->response->setContentType('text/plain', 'UTF-8');
+		$this->response->setContentType('text/plain', 'UTF-8');
 		$this->response->sendHeaders();
 		$this->cacheAgentRule();
 	}
 
-	public function indexAction(){
+	public function announceAction(){
+
 		$info_hash = $this->request->getQuery('info_hash');
 		$peer_id = $this->request->getQuery('peer_id');
+		$agent = $this->request->getQuery('agent');
 		$port = intval($this->request->getQuery('port', 'int'));
 		$uploaded = intval($this->request->getQuery('uploaded', 'int'));
 		$downloaded = intval($this->request->getQuery('downloaded', 'int'));
@@ -66,25 +70,13 @@ class IndexController extends Controller {
 
 		try {
 
-			$user_passkey = $this->checkPasskey($passkey);
-			$torrent_info_hash = $this->checkInfohash($info_hash);
-			if(!$torrent = $this->cache->get("torrent_tid_{$torrent_info_hash['tid']}")){
-				$torrent = array(
-					'interval' => 10,
-					'complete' => 233,
-					'incomplete' => 9,
-					'peers' => array(),
-				);
-				$this->cache->save("torrent_tid_{$torrent_info_hash['tid']}", $torrent, 60);
-			} else {
-				$torrent['peers'] = array($user_passkey['uid'] => array(
-					'ip' 	  => $ip,
-					'port' 	  => $port,
-					'peer id' => $peer_id,
-				)) + $torrent['peers'];
-				$this->cache->save("torrent_tid_{$torrent_info_hash['tid']}", $torrent, 60);
-			}
-/*
+			$user = $this->getUser($passkey);
+			$torrent = $this->getTorrent($info_hash);
+
+			$this->saveAnnounce();
+
+			$peers = $this->getPeers($torrent['tid'], $user['uid'], $event, $numwant);
+
 			if($compact){
 				$peers = $this->compactPeers($peers);
 			} elseif ($no_peer_id){
@@ -92,8 +84,15 @@ class IndexController extends Controller {
 			}
 
 			$peer_stats = $this->getPeerStats($info_hash);
- */
-			$this->response->setContent(Bencode::encode($torrent));
+
+			$announce_response = array(
+				'interval' 		=> $interval,
+				'complete' 		=> intval($peer_stats['complete']);
+				'incomplete' 	=> intval($peer_stats['incomplete']);
+				'peers' 		=> $peers,
+			);
+
+			$this->response->setContent(Bencode::encode($announce_response));
 			$this->response->send();
 
 		} catch (Exception $e){
@@ -101,8 +100,35 @@ class IndexController extends Controller {
 		}
 	}
 
-	protected function getPeers($tid){
-		return $this->cache->get("torrent_{$tid}")['peers'];
+	protected function saveAnnounce($tid, $uid, $peer_id, $ip, $port, $uploaded, $downloaded, $left, $event, $agent){
+
+	}
+
+	protected function getPeers($tid, $uid, $event, $numwant){
+		switch($event){
+		case 'stopped':
+			$peer = Peer::findFirst(array(
+				'conditions' 	=> 'tid = ?1 AND uid = ?2',
+				'bind' 			=> array(1 => $tid, 2 => $uid),
+				'bindTypes' 	=> array(1 => Column::BIND_PARAM_INT, 2 => Column::BIND_PARAM_INT);
+			));
+
+			if($peer){
+				$peer->delete();
+			}
+
+			break;
+
+		case 'started':
+			$peers = Peer::find(array(
+				'columns' 		=> 'peer_id, ip, port',
+				'conditions' 	=> 'tid = ?1',
+				'order' 		=> 'seeder DESC, RAND()',
+				'limit' 		=> $numwant,
+				'hydration' 	=> Resultset::HYDRATE_OBJECTS,
+			));
+
+		}
 	}
 
 	protected function announceFailure($message){
@@ -130,7 +156,6 @@ class IndexController extends Controller {
 
 		foreach($this->cache->get('agent_rule') as $rule){	
 			if(preg_match($rule->peer_id_pattern, $peer_id)){
-				return;
 				if($rule->exception){
 					foreach($rule->exceptions as $exception){
 						if(preg_match($rule->peer_id_pattern, $peer_id)){
@@ -145,7 +170,7 @@ class IndexController extends Controller {
 		$this->announceFailure("您的客户端目前仍未被支持，请更换或联系管理员并提供以下信息: peer_id " . rawurlencode($peer_id));
 	}
 
-	protected function checkPasskey($passkey){
+	protected function getUser($passkey){
 		if(strlen($passkey) != 32){
 			$this->announceFailure("非法的 Passkey");
 		}
@@ -167,12 +192,14 @@ class IndexController extends Controller {
 					'uid' => $user->uid,
 				);	
 				$this->cache->save("user_passkey_{$passkey}", $user);
+
+				return $user;
 			}
 		}
 		return $this->cache->get("user_passkey_{$passkey}");
 	}
 
-	protected function checkInfohash($info_hash){
+	protected function getTorrent($info_hash){
 		if(strlen($info_hash) != 20){
 			$this->announceFailure("非法的 Info Hash");
 		}
@@ -183,10 +210,19 @@ class IndexController extends Controller {
 			} else {
 				// TODO check torrent's states and so on...
 
+
+
+
+
+
+
+
 				$torrent = array(
 					'tid' => $torrent->tid,
 				);
 				$this->cache->save("torrent_info_hash_{$info_hash}", $torrent);
+
+				return $torrent;
 			}
 		}
 		return $this->cache->get("torrent_info_hash_{$info_hash}");
