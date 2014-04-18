@@ -80,14 +80,16 @@
 				<tr>
 					<td>分类</td>
 					<td>
-						<strong>
-							{% if torrent.zhtitle %}[{{ torrent.zhtitle }}]{% endif %}
-							{% if torrent.entitle %}[{{ torrent.entitle }}]{% endif %}
-							{% if torrent.tag1 %}[{{ torrent.tag1 }}]{% endif %}
-							{% if torrent.tag2 %}[{{ torrent.tag2 }}]{% endif %}
-							{% if torrent.tag3 %}[{{ torrent.tag3 }}]{% endif %}
-							{% if torrent.tag4 %}[{{ torrent.tag4 }}]{% endif %}
-						</strong>
+						<a href="{{ url('torrent/' ~ torrent.tid) }}">
+							<strong>
+								{% if torrent.zhtitle %}[{{ torrent.zhtitle }}]{% endif %}
+								{% if torrent.entitle %}[{{ torrent.entitle }}]{% endif %}
+								{% if torrent.tag1 %}[{{ torrent.tag1 }}]{% endif %}
+								{% if torrent.tag2 %}[{{ torrent.tag2 }}]{% endif %}
+								{% if torrent.tag3 %}[{{ torrent.tag3 }}]{% endif %}
+								{% if torrent.tag4 %}[{{ torrent.tag4 }}]{% endif %}
+							</strong>
+						</a>
 						<span class="glyphicon glyphicon-download-alt pull-right"></span>
 						<br />
 						<span class="glyphicon glyphicon-star-empty pull-right"></span>

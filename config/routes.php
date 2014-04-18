@@ -72,7 +72,7 @@ $router->add('/admin/category', array(
 	'controller' => 'category',
 ));
 //}}}
-// {{{ 配置
+// {{{ 配置管理
 $router->add('/admin/config', array(
 	'namespace' => 'NagatoPHP\Backend\Controllers',
 	'module' => 'backend',
@@ -86,6 +86,20 @@ $router->add('/admin/config/{name:[a-zA-Z]+}', array(
 	'controller' => 'config',
 	'action' => 'index',
 	'name' => 1,
+));
+// }}}
+// {{{ 用户管理
+$router->add('/admin/user/:action', array(
+	'namespace' => 'NagatoPHP\Backend\Controllers',
+	'module' => 'backend',
+	'controller' => 'user',
+	'action' => 1,
+));
+$router->add('/admin/user', array(
+	'namespace' => 'NagatoPHP\Backend\Controllers',
+	'module' => 'backend',
+	'controller' => 'user',
+	'action' => 'index',
 ));
 // }}}
 // {{{ 客户端管理
@@ -119,6 +133,11 @@ $router->add('/torrent/{category:[a-zA-Z]+}/:int', array(
 	'category' => 1,
 	'sid' => 2,
 ));
+$router->add('/torrent/:int', array(
+	'controller' => 'torrent',
+	'action' => 'view',
+	'tid' => 1,
+));
 $router->add('/torrent/{category:[a-zA-Z]+}', array(
 	'controller' => 'torrent',
 	'action' => 'index',
@@ -133,6 +152,7 @@ $router->add('/announce.php', array(
 	'namespace' => 'NagatoPHP\Tracker\Controllers',
 	'module' => 'tracker',
 	'controller' => 'index',
+	'action' => 'announce',
 ));
 // }}}
 return $router;

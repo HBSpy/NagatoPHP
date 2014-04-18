@@ -80,14 +80,16 @@
 				<tr>
 					<td>分类</td>
 					<td>
-						<strong>
-							<?php if ($torrent->zhtitle) { ?>[<?php echo $torrent->zhtitle; ?>]<?php } ?>
-							<?php if ($torrent->entitle) { ?>[<?php echo $torrent->entitle; ?>]<?php } ?>
-							<?php if ($torrent->tag1) { ?>[<?php echo $torrent->tag1; ?>]<?php } ?>
-							<?php if ($torrent->tag2) { ?>[<?php echo $torrent->tag2; ?>]<?php } ?>
-							<?php if ($torrent->tag3) { ?>[<?php echo $torrent->tag3; ?>]<?php } ?>
-							<?php if ($torrent->tag4) { ?>[<?php echo $torrent->tag4; ?>]<?php } ?>
-						</strong>
+						<a href="<?php echo $this->url->get('torrent/' . $torrent->tid); ?>">
+							<strong>
+								<?php if ($torrent->zhtitle) { ?>[<?php echo $torrent->zhtitle; ?>]<?php } ?>
+								<?php if ($torrent->entitle) { ?>[<?php echo $torrent->entitle; ?>]<?php } ?>
+								<?php if ($torrent->tag1) { ?>[<?php echo $torrent->tag1; ?>]<?php } ?>
+								<?php if ($torrent->tag2) { ?>[<?php echo $torrent->tag2; ?>]<?php } ?>
+								<?php if ($torrent->tag3) { ?>[<?php echo $torrent->tag3; ?>]<?php } ?>
+								<?php if ($torrent->tag4) { ?>[<?php echo $torrent->tag4; ?>]<?php } ?>
+							</strong>
+						</a>
 						<span class="glyphicon glyphicon-download-alt pull-right"></span>
 						<br />
 						<span class="glyphicon glyphicon-star-empty pull-right"></span>

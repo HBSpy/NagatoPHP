@@ -1,2 +1,3 @@
 Index/index
+{{ fuck }}
 {{ content() }}

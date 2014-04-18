@@ -29,6 +29,19 @@ class TorrentController extends ControllerBase {
     }
 
 	/**
+	 * 种子页面
+	 *
+	 */
+	public function viewAction($tid){
+		$torrent = Torrent::findFirst($tid);
+		echo "<pre>";
+		foreach($torrent as $n){
+			var_dump($n);
+		}
+		echo "</pre>";
+	}
+
+	/**
 	 * 上传种子
 	 *
 	 * @Router('/upload/{category:[a-zA-Z]+}')

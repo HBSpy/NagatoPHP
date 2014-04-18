@@ -17,6 +17,7 @@
 			<li><a href="<?php echo $this->url->get('admin/category'); ?>">分区</a></li>
 			<li><a href="<?php echo $this->url->get('admin/agent'); ?>">客户端</a></li>
 			<li><a href="<?php echo $this->url->get('admin/config'); ?>">配置</a></li>
+			<li><a href="<?php echo $this->url->get('admin/user'); ?>">用户</a></li>
 			<li class="dropdown">
 			<a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
 			<ul class="dropdown-menu">
