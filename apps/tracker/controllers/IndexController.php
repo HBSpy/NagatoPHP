@@ -53,7 +53,7 @@ class IndexController extends Controller {
 
 		$info_hash = $this->request->getQuery('info_hash');
 		$peer_id = $this->request->getQuery('peer_id');
-		$agent = $this->request->getQuery('agent');
+		$agent = $this->request->getUserAgent();
 		$port = intval($this->request->getQuery('port', 'int'));
 		$uploaded = intval($this->request->getQuery('uploaded', 'int'));
 		$downloaded = intval($this->request->getQuery('downloaded', 'int'));
@@ -66,14 +66,14 @@ class IndexController extends Controller {
 
 		$passkey = $this->request->getQuery('passkey', 'alphanum');
 
-		$this->checkPeerId($peer_id);
+		$this->checkPeerId($peer_id, $agent);
 
 		try {
 
 			$user = $this->getUser($passkey);
 			$torrent = $this->getTorrent($info_hash);
 
-			$this->saveAnnounce();
+			$this->saveAnnounce($torrent['tid'], $user['uid'], $peer_id, $ip, $port, $uploaded, $downloaded, $left, $event, $agent);
 
 			$peers = $this->getPeers($torrent['tid'], $user['uid'], $event, $numwant);
 
@@ -83,12 +83,14 @@ class IndexController extends Controller {
 				$peers = $this->removePeerId($peers);
 			}
 
-			$peer_stats = $this->getPeerStats($info_hash);
+			$peer_stats = $this->getPeerStats($torrent['tid']);
+
+			$interval = 30;
 
 			$announce_response = array(
 				'interval' 		=> $interval,
-				'complete' 		=> intval($peer_stats['complete']);
-				'incomplete' 	=> intval($peer_stats['incomplete']);
+				'complete' 		=> intval($peer_stats['complete']),
+				'incomplete' 	=> intval($peer_stats['incomplete']),
 				'peers' 		=> $peers,
 			);
 
@@ -101,34 +103,136 @@ class IndexController extends Controller {
 	}
 
 	protected function saveAnnounce($tid, $uid, $peer_id, $ip, $port, $uploaded, $downloaded, $left, $event, $agent){
+		$peer = Peer::findFirst(array(
+			'conditions' 	=> 'tid = ?1 AND uid = ?2',
+			'bind' 			=> array(1 => $tid, 2 => $uid),
+		));
 
+		if($peer){
+			switch($event){
+
+			case 'stopped':
+
+				$peer->delete();
+				exit;
+
+			case 'completed':
+				$peer->peer_id = $peer_id;
+				$peer->ip = inet_pton($ip);
+				$peer->port = $port;
+				$peer->uploaded = $uploaded;
+				$peer->downloaded = $downloaded;
+				$peer->left = 0;
+				$peer->seeder = TRUE;
+				$peer->agent = $agent;
+
+				$peer->update();
+				return;
+
+			default:
+				$peer->peer_id = $peer_id;
+				$peer->ip = inet_pton($ip);
+				$peer->port = $port;
+				$peer->uploaded = $uploaded;
+				$peer->downloaded = $downloaded;
+				$peer->left = $left;
+				$peer->seeder = FALSE;
+				$peer->agent = $agent;
+
+				$peer->update();
+				return;
+			}
+		} else {
+			switch($event){
+
+			case 'stopped':
+
+				exit;
+
+			case 'completed':
+				$peer = new Peer();
+				$peer->tid = $tid;
+				$peer->uid = $uid;
+				$peer->peer_id = $peer_id;
+				$peer->ip = inet_pton($ip);
+				$peer->port = $port;
+				$peer->uploaded = $uploaded;
+				$peer->downloaded = $downloaded;
+				$peer->left = 0;
+				$peer->seeder = TRUE;
+				$peer->agent = $agent;
+
+				$peer->create();
+				return;
+
+			default:
+				$peer = new Peer();
+				$peer->tid = $tid;
+				$peer->uid = $uid;
+				$peer->peer_id = $peer_id;
+				$peer->ip = inet_pton($ip);
+				$peer->port = $port;
+				$peer->uploaded = $uploaded;
+				$peer->downloaded = $downloaded;
+				$peer->left = $left;
+				$peer->seeder = FALSE;
+				$peer->agent = $agent;
+
+				$peer->create();
+				return;
+			}
+		}
 	}
 
 	protected function getPeers($tid, $uid, $event, $numwant){
+		$peers = array();
 		switch($event){
-		case 'stopped':
-			$peer = Peer::findFirst(array(
-				'conditions' 	=> 'tid = ?1 AND uid = ?2',
-				'bind' 			=> array(1 => $tid, 2 => $uid),
-				'bindTypes' 	=> array(1 => Column::BIND_PARAM_INT, 2 => Column::BIND_PARAM_INT);
-			));
 
-			if($peer){
-				$peer->delete();
+		case 'completed':
+			foreach(Peer::find(array(
+				'columns' 		=> 'peer_id, ip, port',
+				'conditions' 	=> 'tid = ?1 AND seeder = FALSE',
+				'bind' 			=> array(1 => $tid),
+				'order' 		=> 'RAND()',
+				'limit' 		=> $numwant,
+				'hydration' 	=> Resultset::HYDRATE_ARRAYS,
+			)) as $peer){
+				$peer['ip'] = @inet_ntop($peer['ip']);
+				$peers[]= $peer;
 			}
 
-			break;
+			return $peers;
 
-		case 'started':
-			$peers = Peer::find(array(
+		default:
+			foreach(Peer::find(array(
 				'columns' 		=> 'peer_id, ip, port',
 				'conditions' 	=> 'tid = ?1',
+				'bind' 			=> array(1 => $tid),
 				'order' 		=> 'seeder DESC, RAND()',
 				'limit' 		=> $numwant,
-				'hydration' 	=> Resultset::HYDRATE_OBJECTS,
-			));
+				'hydration' 	=> Resultset::HYDRATE_ARRAYS,
+			)) as $peer){
+				$peer['ip'] = @inet_ntop($peer['ip']);
+				$peers[]= $peer;
+			}
 
+			return $peers;
 		}
+	}
+
+	protected function getPeerStats($tid){
+		$ret = array();
+		$ret['complete'] = Peer::count(array(
+			'tid = ?1 AND seeder = TRUE',
+			'bind' => array(1 => $tid),
+		));
+
+		$ret['incomplete'] = Peer::count(array(
+			'tid = ?1 AND seeder = FALSE',
+			'bind' => array(1 => $tid),
+		));
+
+		return $ret;
 	}
 
 	protected function announceFailure($message){
@@ -149,7 +253,13 @@ class IndexController extends Controller {
 		}
 	}
 
-	protected function checkPeerId($peer_id){
+	protected function checkPeerId($peer_id, $agent){
+		foreach(array('Mozilla', 'Opera', 'Links', 'Lynx', 'AppleWebKit', 'Chrome', 'Safari') as $browser){
+			if(strpos($agent, $browser)){
+				exit("浏览器是不行 da☆yo >_<");
+			}
+		}
+
 		if(strlen($peer_id) != 20){
 			$this->announceFailure("非法的 Peer ID");
 		}
