@@ -15,6 +15,7 @@ class ControllerBase extends Controller {
 	public function initialize(){
 		$this->checkLogin();		
 		$this->cacheCategory();
+		$this->cacheConfig();
 		$this->loadTemplate();
 	}
 
@@ -43,8 +44,7 @@ class ControllerBase extends Controller {
 	 * 缓存分区信息
 	 */
 	protected function cacheCategory(){
-		$cacheCategory = $this->cache->get('category');
-		if($cacheCategory == NULL){
+		if(!$cacheCategory = $this->cache->get('category')){
 			$categorys = Category::find();
 			foreach($categorys as $category){
 				$subs = array();
@@ -64,6 +64,17 @@ class ControllerBase extends Controller {
 				$cacheCategory[$category->name] = array('cid' => $category->cid, 'title' => $category->title, 'default' => $category->default, 'subs' => $subs);
 			}
 			$this->cache->save('category', $cacheCategory);
+		}
+		return;
+	}
+
+	/** 
+	 * 缓存网站配置
+	 */
+	protected function cacheConfig(){
+		if(!$cacheConfig = $this->cache->get('config')){
+			$config = include __DIR__ . '/../../config/nagato.php';
+			$this->cache->save('config', $config);
 		}
 		return;
 	}

@@ -46,4 +46,5 @@ class Tool extends Component {
 
 	public function getPagebar($page){
 	}
+
 }

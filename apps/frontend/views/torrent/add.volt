@@ -75,6 +75,7 @@
 		</div>
 	</form>
 </div>
+<pre>{{ content() }}</pre>
 {{ javascript_include('js/jquery.form.js') }}
 <script>
 	$('.item').click(function (){

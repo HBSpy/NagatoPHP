@@ -75,6 +75,7 @@
 		</div>
 	</form>
 </div>
+<pre><?php echo $this->getContent(); ?></pre>
 <?php echo $this->tag->javascriptInclude('js/jquery.form.js'); ?>
 <script>
 	$('.item').click(function (){

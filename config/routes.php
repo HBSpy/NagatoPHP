@@ -72,6 +72,13 @@ $router->add('/admin/category', array(
 	'controller' => 'category',
 ));
 //}}}
+// {{{ 缓存管理 
+$router->add('/admin/cache', array(
+	'namespace' => 'NagatoPHP\Backend\Controllers',
+	'module' => 'backend',
+	'controller' => 'cache',
+));
+// }}}
 // {{{ 配置管理
 $router->add('/admin/config', array(
 	'namespace' => 'NagatoPHP\Backend\Controllers',

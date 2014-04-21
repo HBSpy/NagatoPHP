@@ -1,7 +1,7 @@
 <div class="panel panel-primary">
 	<div class="panel-heading"><strong><?php echo Phalcon\Text::upper($this->dispatcher->getParam('name')); ?> 配置</strong></div>
 	<div class="panel-body">
-		<form class="form-horizontal" role="form">
+		<form class="form-horizontal" id="form-config" role="form">
 			<?php foreach ($configs as $key => $config) { ?>
 			<div class="form-group">
 				<label for="<?php echo $key; ?>" class="col-sm-2 control-label"><?php echo $config['title']; ?></label>
@@ -18,3 +18,13 @@
 		</form>
 	</div>
 </div>
+<script>
+	$('#form-config').submit(function (){
+		$.post('<?php echo $this->url->get('admin/config/' . $this->dispatcher->getParam('name')); ?>', $(this).serialize(), function(data){
+			if(data){
+				window.location.reload();
+			}
+		});
+		return false;
+	});
+</script>
