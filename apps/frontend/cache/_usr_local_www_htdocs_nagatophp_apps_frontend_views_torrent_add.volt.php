@@ -56,7 +56,7 @@
 		<div class="form-group">
 			<label for="entitle" class="col-sm-2 control-label">简介</label>
 			<div class="col-sm-8">
-				<textarea class="form-control" rows="6"></textarea>
+				<textarea class="form-control" name="intro" rows="6"></textarea>
 			</div>
 		</div>
 		<div class="form-group">

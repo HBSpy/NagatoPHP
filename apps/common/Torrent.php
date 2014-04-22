@@ -166,7 +166,7 @@ class Torrent extends Component {
 	 */
 	public function name ( $name = null ) {
 		return is_null( $name ) ?
-			isset( $this->info['name'] ) ? $this->info['name'] : null :
+			isset( $this->info['name.utf-8'] ) ? $this->info['name.utf-8'] : $this->info['name'] :
 			$this->touch( $this->info['name'] = (string) $name );
 	}
 
@@ -238,7 +238,7 @@ class Torrent extends Component {
 		$files = array();
 		if ( isset( $this->info['files'] ) && is_array( $this->info['files'] ) )
 			foreach ( $this->info['files'] as $file )
-				$files[self::path( $file['path'], $this->info['name'] )] = $precision ?
+				$files[self::path( $file['ath'], $this->info['name'] )] = $precision ?
 					self::format( $file['length'], $precision ) :
 					$file['length'];
 		elseif ( isset( $this->info['name'] ) )
