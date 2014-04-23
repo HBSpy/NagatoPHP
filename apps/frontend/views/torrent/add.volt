@@ -90,6 +90,9 @@
 
 	$(function (){
 		$('#uploadform').ajaxForm(function (data){
+			if(data.success){
+				window.location.href = data.redirect;
+			}
 		});
 	});
 </script>

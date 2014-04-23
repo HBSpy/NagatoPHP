@@ -1,6 +1,14 @@
 <?php
 namespace NagatoPHP\Common;
 use Phalcon\Mvc\User\Component; 
+
+// TODO
+//
+// 拆分Bencode与种子处理功能
+// Bencode纯净化
+// 种子处理功能参考http://www.bittorrent.org/beps/bep_0000.html，以实现更加标准，纯净，多功能的种子
+
+
 /**
  * Torrent
  *
@@ -165,9 +173,17 @@ class Torrent extends Component {
 	 * @return string|null name or null if not set
 	 */
 	public function name ( $name = null ) {
-		return is_null( $name ) ?
-			isset( $this->info['name.utf-8'] ) ? $this->info['name.utf-8'] : $this->info['name'] :
-			$this->touch( $this->info['name'] = (string) $name );
+		// Add By HBSpy to FUCK the non-UTF-8
+		if(isset($this->encoding) && $this->encoding != 'UTF-8'){
+			return is_null( $name ) ?
+				isset( $this->info['name.utf-8'] ) ? $this->info['name.utf-8'] : null :
+				$this->touch( $this->info['name.utf-8'] = (string) $name );
+
+		} else {
+			return is_null( $name ) ?
+				isset( $this->info['name'] ) ? $this->info['name'] : null :
+				$this->touch( $this->info['name'] = (string) $name );
+		}
 	}
 
 	/** Getter and setter of source
@@ -236,15 +252,29 @@ class Torrent extends Component {
 	 */
 	public function content ( $precision = null ) {
 		$files = array();
-		if ( isset( $this->info['files'] ) && is_array( $this->info['files'] ) )
-			foreach ( $this->info['files'] as $file )
-				$files[self::path( $file['ath'], $this->info['name'] )] = $precision ?
-					self::format( $file['length'], $precision ) :
-					$file['length'];
-		elseif ( isset( $this->info['name'] ) )
-				$files[$this->info['name']] = $precision ?
-					self::format( $this->info['length'], $precision ) :
-					$this->info['length'];
+		// Add By HBSpy to FUCK the non-UTF-8
+		if(isset($this->encoding) && $this->encoding != 'UTF-8'){
+			if ( isset( $this->info['files'] ) && is_array( $this->info['files'] ) )
+				foreach ( $this->info['files'] as $file )
+					$files[self::path( $file['path.utf-8'], $this->info['name.utf-8'] )] = $precision ?
+						self::format( $file['length'], $precision ) :
+						$file['length'];
+			elseif ( isset( $this->info['name.utf-8'] ) )
+					$files[$this->info['name.utf-8']] = $precision ?
+						self::format( $this->info['length'], $precision ) :
+						$this->info['length'];
+			
+		} else {
+			if ( isset( $this->info['files'] ) && is_array( $this->info['files'] ) )
+				foreach ( $this->info['files'] as $file )
+					$files[self::path( $file['path'], $this->info['name'] )] = $precision ?
+						self::format( $file['length'], $precision ) :
+						$file['length'];
+			elseif ( isset( $this->info['name'] ) )
+					$files[$this->info['name']] = $precision ?
+						self::format( $this->info['length'], $precision ) :
+						$this->info['length'];
+		}
 		return $files;
 	}
 
@@ -640,7 +670,7 @@ class Torrent extends Component {
 			return self::set_error( new Exception( 'Failed to open file: "' . $file . '"' ) );
 		return array(
 			'length'	=> $size,
-			'name'		=> end( explode( DIRECTORY_SEPARATOR, $file ) ),
+			'name'		=> @end( explode( DIRECTORY_SEPARATOR, $file ) ),
 			'piece length'	=> $piece_length,
 			'pieces'	=> $this->pieces( $handle, $piece_length )
 		);

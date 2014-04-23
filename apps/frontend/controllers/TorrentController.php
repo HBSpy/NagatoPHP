@@ -65,10 +65,8 @@ class TorrentController extends ControllerBase {
 				$this->view->disable();
 				if($this->request->hasFiles()){
 					$torrent_file = $this->request->getUploadedFiles()[0];
-					if(TorrentTool::is_torrent($torrent_file->getTempName())){
+					if($torrent_file->getType() == 'application/x-bittorrent'){
 						$torrent_file = new TorrentTool($torrent_file->getTempName());
-						var_dump($torrent_file->content());
-						exit;
 						$torrent_file->announce(FALSE);
 						$torrent_file->is_private(true);
 						$torrent_file->source("[" . $this->cache->get('config')['SITE_URL'] . "]" . $this->cache->get('config')['SITE_NAME']);
@@ -100,7 +98,9 @@ class TorrentController extends ControllerBase {
 								mkdir($torrent_file_dir);
 							}
 							$torrent_file_name = $torrent_file_dir . '/' . $torrent->tid . '_' . crc32($torrent_file->name()) . '.torrent';
-							$torrent_file->save($torrent_file_name);
+							if($torrent_file->save($torrent_file_name)){
+								$torrent_file->send();
+							}
 
 							$torrent_info = new TorrentInfo();
 							$torrent_info->tid = $torrent->tid;
@@ -108,8 +108,9 @@ class TorrentController extends ControllerBase {
 							$torrent_info->saveas = $torrent_file->name();
 							$torrent_info->intro = $this->request->getPost('intro');
 							$torrent_info->file = json_encode($torrent_file->content());
-							$torrent_info->create();
-						} else {
+							if($torrent_info->create()){
+								$this->tool->ajaxReturn(array('success' => TRUE, 'redirect' => $this->url->get("torrent/{$torrent->tid}")));
+							}
 						}
 					} else {
 						$this->tool->ajaxReturn(array('error' => 'ERRORTYPE'));

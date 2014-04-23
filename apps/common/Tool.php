@@ -5,6 +5,16 @@ use Phalcon\Mvc\User\Component;
 
 class Tool extends Component {
 
+	// TODO 
+	// 
+	// 丰富ajax返回类型
+	// success:
+	// 		redirect: url
+	//
+	// error:  
+	// 		color: warning | danger
+	// 		id: (form-control)
+	// 		msg: (string)
 	public function ajaxReturn($data){
 		header('Content-Type: application/json');
 		exit(json_encode($data));
