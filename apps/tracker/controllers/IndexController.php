@@ -3,13 +3,13 @@
 namespace NagatoPHP\Tracker\Controllers;
 
 use NagatoPHP\Common\Torrent as Bencode;
-use NagatoPHP\Models\AgentFamily as AgentFamily;
-use NagatoPHP\Models\AgentException as AgentException;
-use NagatoPHP\Models\User as User;
-use NagatoPHP\Models\Torrent as Torrent;
-use NagatoPHP\Models\Peer as Peer;
-use Phalcon\Mvc\Model\Resultset as Resultset;
 use Phalcon\Mvc\Controller;
+
+use NagatoPHP\Models\AgentFamily;
+use NagatoPHP\Models\AgentException;
+use NagatoPHP\Models\User;
+use NagatoPHP\Models\Torrent;
+use NagatoPHP\Models\Peer;
 
 /**
  *
@@ -44,7 +44,7 @@ use Phalcon\Mvc\Controller;
 class IndexController extends Controller {
 
 	public function initialize(){
-		$this->response->setContentType('text/plain', 'UTF-8');
+//		$this->response->setContentType('text/plain', 'UTF-8');
 		$this->response->sendHeaders();
 		$this->cacheAgentRule();
 	}
@@ -54,6 +54,9 @@ class IndexController extends Controller {
 		$info_hash = $this->request->getQuery('info_hash');
 		$peer_id = $this->request->getQuery('peer_id');
 		$agent = $this->request->getUserAgent();
+
+		$agent = 'Test';
+
 		$port = intval($this->request->getQuery('port', 'int'));
 		$uploaded = intval($this->request->getQuery('uploaded', 'int'));
 		$downloaded = intval($this->request->getQuery('downloaded', 'int'));
@@ -118,7 +121,7 @@ class IndexController extends Controller {
 
 			case 'completed':
 				$peer->peer_id = $peer_id;
-				$peer->ip = inet_pton($ip);
+				$peer->ip = $ip;
 				$peer->port = $port;
 				$peer->uploaded = $uploaded;
 				$peer->downloaded = $downloaded;
@@ -131,7 +134,7 @@ class IndexController extends Controller {
 
 			default:
 				$peer->peer_id = $peer_id;
-				$peer->ip = inet_pton($ip);
+				$peer->ip = $ip;
 				$peer->port = $port;
 				$peer->uploaded = $uploaded;
 				$peer->downloaded = $downloaded;
@@ -154,7 +157,7 @@ class IndexController extends Controller {
 				$peer->tid = $tid;
 				$peer->uid = $uid;
 				$peer->peer_id = $peer_id;
-				$peer->ip = inet_pton($ip);
+				$peer->ip = $ip;
 				$peer->port = $port;
 				$peer->uploaded = $uploaded;
 				$peer->downloaded = $downloaded;
@@ -170,7 +173,7 @@ class IndexController extends Controller {
 				$peer->tid = $tid;
 				$peer->uid = $uid;
 				$peer->peer_id = $peer_id;
-				$peer->ip = inet_pton($ip);
+				$peer->ip = $ip;
 				$peer->port = $port;
 				$peer->uploaded = $uploaded;
 				$peer->downloaded = $downloaded;
@@ -190,31 +193,32 @@ class IndexController extends Controller {
 
 		case 'completed':
 			foreach(Peer::find(array(
-				'columns' 		=> 'peer_id, ip, port',
 				'conditions' 	=> 'tid = ?1 AND seeder = FALSE',
 				'bind' 			=> array(1 => $tid),
 				'order' 		=> 'RAND()',
 				'limit' 		=> $numwant,
-				'hydration' 	=> Resultset::HYDRATE_ARRAYS,
 			)) as $peer){
-				$peer['ip'] = @inet_ntop($peer['ip']);
-				$peers[]= $peer;
+				$peers[]= array(
+					'peer id' 	=> $peer->peer_id,
+					'ip' 		=> inet_ntop($peer->ip),
+					'port' 		=> $peer->port,
+				);
 			}
 
 			return $peers;
 
 		default:
-			foreach(Peer::find(array(
-				'columns' 		=> 'peer_id, ip, port',
+			$peers = Peer::find(array(
 				'conditions' 	=> 'tid = ?1',
 				'bind' 			=> array(1 => $tid),
 				'order' 		=> 'seeder DESC, RAND()',
 				'limit' 		=> $numwant,
-				'hydration' 	=> Resultset::HYDRATE_ARRAYS,
-			)) as $peer){
-				$peer['ip'] = @inet_ntop($peer['ip']);
-				$peers[]= $peer;
+			));
+
+			foreach($peers as $peer){
+				var_dump($peer);
 			}
+			exit;
 
 			return $peers;
 		}
@@ -254,11 +258,13 @@ class IndexController extends Controller {
 	}
 
 	protected function checkPeerId($peer_id, $agent){
+		/*
 		foreach(array('Mozilla', 'Opera', 'Links', 'Lynx', 'AppleWebKit', 'Chrome', 'Safari') as $browser){
 			if(strpos($agent, $browser)){
 				exit("浏览器是不行 da☆yo >_<");
 			}
 		}
+		 */
 
 		if(strlen($peer_id) != 20){
 			$this->announceFailure("非法的 Peer ID");
@@ -341,8 +347,8 @@ class IndexController extends Controller {
 	protected function cacheAgentRule(){
 		if(!$this->cache->exists('agent_rule')){
 			$agent_rule = array();
-			foreach(AgentFamily::find(array('order' => 'hits DESC', 'hydration' => Resultset::HYDRATE_OBJECTS)) as $family){
-				foreach(AgentException::find(array("fid = {$family->fid}", 'hydration' => Resultset::HYDRATE_OBJECTS)) as $exception){
+			foreach(AgentFamily::find(array('order' => 'hits DESC')) as $family){
+				foreach(AgentException::find(array("fid = {$family->fid}")) as $exception){
 					$family->exceptions[]= $exception;
 				}
 				$agent_rule[]= $family;

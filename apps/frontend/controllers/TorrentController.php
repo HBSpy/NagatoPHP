@@ -1,9 +1,10 @@
 <?php
 
 namespace NagatoPHP\Frontend\Controllers;
-use NagatoPHP\Common\Torrent as TorrentTool;
-use NagatoPHP\Models\Torrent as Torrent;
-use NagatoPHP\Models\TorrentInfo as TorrentInfo;
+
+use NagatoPHP\Common\Torrent as TorrentTool,
+	NagatoPHP\Models\Torrent,
+	NagatoPHP\Models\TorrentInfo;
 
 class TorrentController extends ControllerBase {
 
@@ -68,26 +69,19 @@ class TorrentController extends ControllerBase {
 					if($torrent_file->getType() == 'application/x-bittorrent'){
 						$torrent_file = new TorrentTool($torrent_file->getTempName());
 						$torrent_file->announce(FALSE);
-						$torrent_file->is_private(true);
+						$torrent_file->is_private(TRUE);
 						$torrent_file->source("[" . $this->cache->get('config')['SITE_URL'] . "]" . $this->cache->get('config')['SITE_NAME']);
-
-						// 重复检测
-						if(Torrent::findFirstByInfohash(pack('H*', $torrent_file->hash_info()))){
-							$this->tool->ajaxReturn(array('error' => 'DUPE'));
-						}
 
 						// TODO 文件过滤
 
 						$torrent = new Torrent();
-						$torrent->infohash = pack('H*', $torrent_file->hash_info());
+						$torrent->infohash = $torrent_file->hash_info();
 						$torrent->owner = $this->session->get('uid');
 						$torrent->status = 'NORMAL';
 						$torrent->size = $torrent_file->size();
 						$torrent->sid = $sid;
-						$torrent->anonymous = $this->request->getPost('anonymous') ? TRUE : FALSE;
 						$torrent->addtime = date('Y-m-d H:i:s');
 						foreach($this->request->getPost() as $key => $value){
-							if(!in_array($key, array('anonymous', 'intro')))
 							$torrent->$key = $value;
 						}
 						if($torrent->create()){
@@ -98,25 +92,31 @@ class TorrentController extends ControllerBase {
 								mkdir($torrent_file_dir);
 							}
 							$torrent_file_name = $torrent_file_dir . '/' . $torrent->tid . '_' . crc32($torrent_file->name()) . '.torrent';
-							if($torrent_file->save($torrent_file_name)){
-								$torrent_file->send();
-							}
+							$torrent_file->save($torrent_file_name);
 
 							$torrent_info = new TorrentInfo();
 							$torrent_info->tid = $torrent->tid;
 							$torrent_info->filename = $torrent_file_name;
 							$torrent_info->saveas = $torrent_file->name();
 							$torrent_info->intro = $this->request->getPost('intro');
-							$torrent_info->file = json_encode($torrent_file->content());
+							$torrent_info->file = $torrent_file->content();
 							if($torrent_info->create()){
-								$this->tool->ajaxReturn(array('success' => TRUE, 'redirect' => $this->url->get("torrent/{$torrent->tid}")));
+								$this->ajax->success($this->url->get("torrent/{$torrent->tid}"));
 							}
+						} else {
+							foreach($torrent->getMessages() as $message){
+								$errors[]= array(
+									'field'  	=> $message->getField(),
+									'message' 	=> $message->getMessage(),
+								);
+							}
+							$this->ajax->error($errors);
 						}
 					} else {
-						$this->tool->ajaxReturn(array('error' => 'ERRORTYPE'));
+						$this->ajax->error(array('field' => 'torrent', 'message' => '非种子文件'));
 					}
 				} else {
-					$this->tool->ajaxReturn(array('error' => 'NOFILE'));
+					$this->ajax->error(array('field' => 'torrent', 'message' => '请选择种子文件'));
 				}
 			}
 		} else {
